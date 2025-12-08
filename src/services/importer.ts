@@ -9,9 +9,6 @@ import {
 import { initDatabase } from "../util/db.util";
 import { GitHubAPI, GitHubAPIError } from "./github";
 
-/**
- * Import a GitHub repository into the database
- */
 export class RepositoryImporter {
   private github: GitHubAPI;
   private onProgress?: ProgressCallback;
@@ -21,9 +18,6 @@ export class RepositoryImporter {
     this.onProgress = onProgress;
   }
 
-  /**
-   * Report progress
-   */
   private reportProgress(
     step: string,
     current: number,
@@ -35,12 +29,8 @@ export class RepositoryImporter {
     }
   }
 
-  /**
-   * Import a repository from a GitHub URL
-   */
   async importRepository(repoUrl: string): Promise<ImportResult> {
     try {
-      // Initialize database
       await initDatabase();
       this.reportProgress("init", 0, 5, "Initializing database...");
 
@@ -63,7 +53,6 @@ export class RepositoryImporter {
 
       const repoId = `github-${repoData.id}`;
 
-      // Insert repository
       await insertRepository({
         id: repoId,
         owner: repoData.owner.login,
