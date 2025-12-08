@@ -1,7 +1,7 @@
 import { Repl } from "@electric-sql/pglite-repl";
 import { styled } from "goober";
 import { useEffect, useState } from "react";
-import { getDatabase, initDatabase } from "../../services/db";
+import { getDatabase, initDatabase } from "../../util/db.util";
 
 export const DatabaseRepl = () => {
   const [isOpen, setIsOpen] = useState(false);

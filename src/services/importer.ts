@@ -1,12 +1,12 @@
 import type { ImportResult, ProgressCallback } from "../types/import.types";
+import { insertComments } from "../lib/db/repositories/comments.repository";
+import { insertFiles } from "../lib/db/repositories/files.repository";
+import { insertIssues } from "../lib/db/repositories/issues.repository";
 import {
   getImportStats,
-  initDatabase,
-  insertComments,
-  insertFiles,
-  insertIssues,
   insertRepository,
-} from "./db";
+} from "../lib/db/repositories/repo.repository";
+import { initDatabase } from "../util/db.util";
 import { GitHubAPI, GitHubAPIError } from "./github";
 
 /**
