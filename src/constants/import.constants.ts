@@ -24,6 +24,7 @@ export const TEXT_FILE_EXTENSIONS = [
   "xml",
   "html",
   "css",
+  "log",
 ] as const;
 
 export const IMAGE_FILE_EXTENSIONS = [
