@@ -1,4 +1,4 @@
-import type { ImportResult, ProgressCallback } from "../types/import.types";
+import { GitHubAPIError } from "../error/githubapi.error";
 import { insertComments } from "../lib/db/repositories/comments.repository";
 import { insertFiles } from "../lib/db/repositories/files.repository";
 import { insertIssues } from "../lib/db/repositories/issues.repository";
@@ -6,8 +6,9 @@ import {
   getImportStats,
   insertRepository,
 } from "../lib/db/repositories/repo.repository";
+import type { ImportResult, ProgressCallback } from "../types/import.types";
 import { initDatabase } from "../util/db.util";
-import { GitHubAPI, GitHubAPIError } from "./github";
+import { GitHubAPI } from "./github.service";
 
 export class RepositoryImporter {
   private github: GitHubAPI;

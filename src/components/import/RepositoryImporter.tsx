@@ -3,7 +3,7 @@ import { ImportForm } from "./ImportForm";
 import { ImportProgress } from "./ImportProgress";
 import { ImportStats } from "./ImportStats";
 import { ImportErrorDisplay } from "./ImportErrorDisplay";
-import { RepositoryImporter as ImporterService } from "../../services/importer";
+import { RepositoryImporter as ImporterService } from "../../services/importer.service";
 import type { ImportState } from "../../types/import.types";
 
 export const RepositoryImporter = () => {

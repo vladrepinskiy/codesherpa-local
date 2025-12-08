@@ -1,29 +1,11 @@
+import { GitHubAPIError } from "../error/githubapi.error";
 import type {
-  GitHubRepo,
-  GitHubIssue,
   GitHubComment,
-  GitHubTreeItem,
+  GitHubIssue,
+  GitHubRepo,
   GitHubTree,
+  GitHubTreeItem,
 } from "../types/github.types";
-
-export class GitHubAPIError extends Error {
-  statusCode?: number;
-  rateLimitRemaining?: number;
-  rateLimitReset?: number;
-
-  constructor(
-    message: string,
-    statusCode?: number,
-    rateLimitRemaining?: number,
-    rateLimitReset?: number
-  ) {
-    super(message);
-    this.name = "GitHubAPIError";
-    this.statusCode = statusCode;
-    this.rateLimitRemaining = rateLimitRemaining;
-    this.rateLimitReset = rateLimitReset;
-  }
-}
 
 export class GitHubAPI {
   private baseUrl = "https://api.github.com";
@@ -33,9 +15,6 @@ export class GitHubAPI {
     this.token = token;
   }
 
-  /**
-   * Make a request to the GitHub API
-   */
   private async request<T>(endpoint: string): Promise<T> {
     const headers: HeadersInit = {
       Accept: "application/vnd.github.v3+json",
@@ -47,7 +26,6 @@ export class GitHubAPI {
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
 
-    // Check rate limit
     const rateLimitRemaining = response.headers.get("x-ratelimit-remaining");
     const rateLimitReset = response.headers.get("x-ratelimit-reset");
 
@@ -77,9 +55,6 @@ export class GitHubAPI {
     return response.json();
   }
 
-  /**
-   * Fetch all pages of a paginated endpoint
-   */
   private async fetchAllPages<T>(
     endpoint: string,
     maxPages = 100
@@ -110,9 +85,6 @@ export class GitHubAPI {
     return results;
   }
 
-  /**
-   * Parse a GitHub repository URL
-   */
   parseRepoUrl(url: string): { owner: string; repo: string } | null {
     // Handle various GitHub URL formats
     const patterns = [
@@ -130,16 +102,10 @@ export class GitHubAPI {
     return null;
   }
 
-  /**
-   * Fetch repository metadata
-   */
   async fetchRepository(owner: string, repo: string): Promise<GitHubRepo> {
     return this.request<GitHubRepo>(`/repos/${owner}/${repo}`);
   }
 
-  /**
-   * Fetch the entire repository tree recursively
-   */
   async fetchRepositoryTree(
     owner: string,
     repo: string,
@@ -163,9 +129,6 @@ export class GitHubAPI {
     return tree.tree.filter((item) => item.type === "blob");
   }
 
-  /**
-   * Fetch file content
-   */
   async fetchFileContent(
     owner: string,
     repo: string,
@@ -186,9 +149,6 @@ export class GitHubAPI {
     return response.content;
   }
 
-  /**
-   * Fetch all issues (including pull requests)
-   */
   async fetchIssues(
     owner: string,
     repo: string,
@@ -199,9 +159,6 @@ export class GitHubAPI {
     );
   }
 
-  /**
-   * Fetch comments for a specific issue
-   */
   async fetchIssueComments(
     owner: string,
     repo: string,
@@ -212,9 +169,6 @@ export class GitHubAPI {
     );
   }
 
-  /**
-   * Fetch comments for all issues
-   */
   async fetchAllIssueComments(
     owner: string,
     repo: string
@@ -241,9 +195,6 @@ export class GitHubAPI {
     return commentsByIssue;
   }
 
-  /**
-   * Check rate limit status
-   */
   async checkRateLimit(): Promise<{
     limit: number;
     remaining: number;
