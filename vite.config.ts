@@ -28,7 +28,7 @@ export default defineConfig({
   logLevel: "info",
   clearScreen: false,
   optimizeDeps: {
-    exclude: ["@electric-sql/pglite"],
+    exclude: ["@electric-sql/pglite", "@mlc-ai/web-llm"],
   },
   build: {
     target: "esnext",

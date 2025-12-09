@@ -1,12 +1,34 @@
 import { styled } from "goober";
 import { Page } from "../core/Page";
+import { ChatInput } from "../chat/ChatInput";
+import { ChatLoadingSpinner } from "../chat/ChatLoadingSpinner";
+import { ChatMessageList } from "../chat/ChatMessageList";
+import { useChat } from "../../hooks/useChat";
+import { useLLM } from "../../hooks/useLLM";
 
 export const Chat = () => {
+  const { isInitialized } = useLLM();
+  const { messages, input, isLoading, handleInputChange, handleSubmit } =
+    useChat();
+
+  if (!isInitialized) {
+    return (
+      <Page>
+        <ChatLoadingSpinner />
+      </Page>
+    );
+  }
+
   return (
     <Page>
       <ChatContainer>
-        <Title>Chat</Title>
-        <Description>Chat functionality coming soon...</Description>
+        <ChatMessageList messages={messages} />
+        <ChatInput
+          value={input}
+          onChange={handleInputChange}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </ChatContainer>
     </Page>
   );
@@ -15,19 +37,11 @@ export const Chat = () => {
 const ChatContainer = styled("div")`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const Title = styled("h1")`
-  font-size: 2rem;
-  font-weight: 600;
-  margin: 0;
-  color: ${(props) => props.theme.palette.text};
-`;
-
-const Description = styled("p")`
-  font-size: 1rem;
-  color: ${(props) => props.theme.palette.textMuted};
-  margin: 0;
+  height: calc(100vh - 4rem);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: ${(props) => props.theme.palette.bg};
+  border-radius: 0.5rem;
+  overflow: hidden;
 `;

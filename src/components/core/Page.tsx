@@ -15,7 +15,6 @@ const PageContainer = styled("div")`
   align-items: center;
   justify-content: center;
   height: 100vh;
-  padding: 2rem;
   margin: 0 auto;
   background-color: ${(props) => props.theme.palette.bg};
 `;
