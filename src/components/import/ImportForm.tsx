@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { styled } from "goober";
+import { Button } from "../core/Button";
 import type { ImportFormProps } from "../../types/component.types";
 
 export const ImportForm = ({ onImport, isImporting }: ImportFormProps) => {
@@ -69,13 +70,9 @@ export const ImportForm = ({ onImport, isImporting }: ImportFormProps) => {
           )}
         </FormGroup>
 
-        <SubmitButton
-          type="submit"
-          disabled={isImporting || !repoUrl.trim()}
-          $disabled={isImporting || !repoUrl.trim()}
-        >
+        <Button type="submit" disabled={isImporting || !repoUrl.trim()}>
           {isImporting ? "Importing..." : "Import Repository"}
-        </SubmitButton>
+        </Button>
       </Form>
 
       <InfoBox>
@@ -99,11 +96,13 @@ const Container = styled("div")`
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
+  background-color: ${(props) => props.theme.palette.bg};
 `;
 
 const Title = styled("h1")`
   margin-bottom: 20px;
   font-size: 2rem;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const Form = styled("form")`
@@ -120,27 +119,30 @@ const Label = styled("label")`
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const Input = styled("input")`
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid ${(props) => props.theme.palette.text};
   border-radius: 4px;
   box-sizing: border-box;
+  background-color: ${(props) => props.theme.palette.bg};
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const HelpText = styled("p")`
   font-size: 14px;
-  color: #666;
+  color: ${(props) => props.theme.palette.textMuted};
   margin-top: 5px;
 `;
 
 const ToggleButton = styled("button")`
   background: none;
   border: none;
-  color: #0969da;
+  color: ${(props) => props.theme.palette.accent};
   cursor: pointer;
   padding: 0;
   font-size: 14px;
@@ -158,46 +160,37 @@ const TokenInputGroup = styled("div")`
 
 const TokenHelpText = styled("p")`
   font-size: 12px;
-  color: #666;
+  color: ${(props) => props.theme.palette.textMuted};
   margin-top: 5px;
 `;
 
 const TokenLink = styled("a")`
-  color: #0969da;
-`;
-
-const SubmitButton = styled("button")<{ $disabled: boolean }>`
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  background-color: ${(props) => (props.$disabled ? "#94d3a2" : "#2da44e")};
-  border: none;
-  border-radius: 6px;
-  cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
-  margin-top: 10px;
+  color: ${(props) => props.theme.palette.accent};
 `;
 
 const InfoBox = styled("div")`
   margin-top: 30px;
   padding: 15px;
-  background-color: #f6f8fa;
+  background-color: ${(props) => props.theme.palette.bg};
+  border: 1px solid ${(props) => props.theme.palette.text};
   border-radius: 6px;
 `;
 
 const InfoTitle = styled("h3")`
   margin-top: 0;
   font-size: 16px;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const InfoList = styled("ul")`
   margin: 10px 0;
   padding-left: 20px;
   font-size: 14px;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const InfoText = styled("p")`
   font-size: 14px;
-  color: #666;
+  color: ${(props) => props.theme.palette.textMuted};
   margin: 10px 0 0 0;
 `;

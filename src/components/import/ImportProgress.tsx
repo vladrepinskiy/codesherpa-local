@@ -49,11 +49,13 @@ const Container = styled("div")`
   max-width: 600px;
   margin: 20px auto;
   padding: 20px;
+  background-color: ${(props) => props.theme.palette.bg};
 `;
 
 const Title = styled("h2")`
   margin-bottom: 20px;
   font-size: 1.5rem;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const ProgressSection = styled("div")`
@@ -69,32 +71,35 @@ const ProgressHeader = styled("div")`
 const ProgressMessage = styled("span")`
   font-size: 14px;
   font-weight: 500;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const ProgressCount = styled("span")`
   font-size: 14px;
-  color: #666;
+  color: ${(props) => props.theme.palette.textMuted};
 `;
 
 const ProgressBarContainer = styled("div")`
   width: 100%;
   height: 8px;
-  background-color: #e1e4e8;
+  background-color: ${(props) => props.theme.palette.textMuted};
   border-radius: 4px;
   overflow: hidden;
+  opacity: 0.3;
 `;
 
 const ProgressBarFill = styled("div")<{ $percentage: number }>`
   width: ${(props) => props.$percentage}%;
   height: 100%;
-  background-color: #2da44e;
+  background-color: ${(props) => props.theme.palette.accent};
   transition: width 0.3s ease;
 `;
 
 const StepsBox = styled("div")`
   margin-top: 20px;
   padding: 15px;
-  background-color: #f6f8fa;
+  background-color: ${(props) => props.theme.palette.bg};
+  border: 1px solid ${(props) => props.theme.palette.text};
   border-radius: 6px;
   font-size: 14px;
 `;
@@ -102,11 +107,13 @@ const StepsBox = styled("div")`
 const StepsTitle = styled("p")`
   margin: 0 0 10px 0;
   font-weight: 500;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const StepsList = styled("ol")`
   margin: 0;
   padding-left: 20px;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const StepItem = styled("li")<{ $active: boolean }>`

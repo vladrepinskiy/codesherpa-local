@@ -1,4 +1,5 @@
 import { styled } from "goober";
+import { Button } from "../core/Button";
 import type { ImportStatsProps } from "../../types/component.types";
 
 export const ImportStats = ({ stats, repoName, onReset }: ImportStatsProps) => {
@@ -50,7 +51,9 @@ export const ImportStats = ({ stats, repoName, onReset }: ImportStatsProps) => {
         </SuccessText>
       </SuccessBox>
 
-      <ResetButton onClick={onReset}>Import Another Repository</ResetButton>
+      <ButtonContainer>
+        <Button onClick={onReset}>Import Another Repository</Button>
+      </ButtonContainer>
     </Container>
   );
 };
@@ -79,6 +82,7 @@ const Container = styled("div")`
   max-width: 600px;
   margin: 20px auto;
   padding: 20px;
+  background-color: ${(props) => props.theme.palette.bg};
 `;
 
 const Header = styled("div")`
@@ -94,13 +98,13 @@ const SuccessIcon = styled("div")`
 const SuccessTitle = styled("h2")`
   margin: 0 0 10px 0;
   font-size: 1.8rem;
-  color: #2da44e;
+  color: ${(props) => props.theme.palette.accent};
 `;
 
 const RepoName = styled("p")`
   margin: 0;
   font-size: 16px;
-  color: #666;
+  color: ${(props) => props.theme.palette.textMuted};
 `;
 
 const StatsGrid = styled("div")`
@@ -112,9 +116,9 @@ const StatsGrid = styled("div")`
 
 const StatCardContainer = styled("div")`
   padding: 20px;
-  background-color: #f6f8fa;
+  background-color: ${(props) => props.theme.palette.bg};
   border-radius: 6px;
-  border: 1px solid #d0d7de;
+  border: 1px solid ${(props) => props.theme.palette.text};
 `;
 
 const StatIcon = styled("div")`
@@ -131,13 +135,13 @@ const StatValue = styled("div")<{ $color: string }>`
 
 const StatLabel = styled("div")`
   font-size: 14px;
-  color: #59636e;
+  color: ${(props) => props.theme.palette.textMuted};
 `;
 
 const SuccessBox = styled("div")`
   padding: 15px;
-  background-color: #dff6dd;
-  border: 1px solid #2da44e;
+  background-color: ${(props) => props.theme.palette.bg};
+  border: 1px solid ${(props) => props.theme.palette.accent};
   border-radius: 6px;
   margin-bottom: 20px;
 `;
@@ -145,17 +149,9 @@ const SuccessBox = styled("div")`
 const SuccessText = styled("p")`
   margin: 0;
   font-size: 14px;
-  color: #0f5323;
+  color: ${(props) => props.theme.palette.text};
 `;
 
-const ResetButton = styled("button")`
+const ButtonContainer = styled("div")`
   width: 100%;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #24292f;
-  background-color: #f6f8fa;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  cursor: pointer;
 `;

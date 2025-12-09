@@ -68,8 +68,8 @@ const ReplContainer = styled("div")`
   right: 0;
   height: 50vh;
   z-index: 9999;
-  background-color: white;
-  border-top: 1px solid #d0d7de;
+  background-color: ${(props) => props.theme.palette.bg};
+  border-top: 1px solid ${(props) => props.theme.palette.text};
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 `;
 

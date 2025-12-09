@@ -17,4 +17,5 @@ const PageContainer = styled("div")`
   height: 100vh;
   padding: 2rem;
   margin: 0 auto;
+  background-color: ${(props) => props.theme.palette.bg};
 `;

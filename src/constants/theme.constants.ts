@@ -17,6 +17,14 @@ export const LIGHT_THEME: Theme = {
     text: "#1a1a1a",
     textMuted: "#808080",
     accent: "#f5a623",
+    button: {
+      bg: "#e5e5e5",
+      hover: "#d0d0d0",
+      active: "#b8b8b8",
+      disabled: "#f0f0f0",
+      text: "#1a1a1a",
+      disabledText: "#a0a0a0",
+    },
   },
   fontSizes: FONT_SIZES,
 };
@@ -29,6 +37,14 @@ export const DARK_THEME: Theme = {
     text: "#f5f5f5",
     textMuted: "#999999",
     accent: "#ffbf69",
+    button: {
+      bg: "#2d2d2d",
+      hover: "#3a3a3a",
+      active: "#4a4a4a",
+      disabled: "#252525",
+      text: "#f5f5f5",
+      disabledText: "#666666",
+    },
   },
   fontSizes: FONT_SIZES,
 };

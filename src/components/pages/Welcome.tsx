@@ -1,5 +1,6 @@
 import { styled } from "goober";
 import { useLocation } from "wouter";
+import { Button } from "../core/Button";
 import { Page } from "../core/Page";
 
 export const Welcome = () => {
@@ -44,12 +45,13 @@ const Title = styled("h1")`
   font-weight: 600;
   margin: 0;
   text-align: center;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const Description = styled("p")`
   font-size: 1.125rem;
   line-height: 1.75;
-  color: #4b5563;
+  color: ${(props) => props.theme.palette.textMuted};
   text-align: center;
   max-width: 600px;
   margin: 0;
@@ -59,24 +61,4 @@ const ButtonContainer = styled("div")`
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
-`;
-
-const Button = styled("button")`
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #2563eb;
-  }
-
-  &:active {
-    background-color: #1d4ed8;
-  }
 `;

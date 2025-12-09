@@ -1,4 +1,5 @@
 import { styled } from "goober";
+import { Button } from "./Button";
 import type { ErrorDisplayProps } from "../../types/component.types";
 
 export const ErrorDisplay = ({
@@ -18,7 +19,9 @@ export const ErrorDisplay = ({
       <ErrorBox>{children}</ErrorBox>
 
       {actionLabel && onAction && (
-        <ActionButton onClick={onAction}>{actionLabel}</ActionButton>
+        <ButtonContainer>
+          <Button onClick={onAction}>{actionLabel}</Button>
+        </ButtonContainer>
       )}
     </Container>
   );
@@ -28,6 +31,7 @@ const Container = styled("div")`
   max-width: 600px;
   margin: 20px auto;
   padding: 20px;
+  background-color: ${(props) => props.theme.palette.bg};
 `;
 
 const Header = styled("div")`
@@ -43,25 +47,17 @@ const ErrorIcon = styled("div")`
 const ErrorTitle = styled("h2")`
   margin: 0 0 10px 0;
   font-size: 1.8rem;
-  color: #d73a4a;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const ErrorBox = styled("div")`
   padding: 15px;
-  background-color: #fff5f5;
-  border: 1px solid #d73a4a;
+  background-color: ${(props) => props.theme.palette.bg};
+  border: 1px solid ${(props) => props.theme.palette.text};
   border-radius: 6px;
   margin-bottom: 20px;
 `;
 
-const ActionButton = styled("button")`
+const ButtonContainer = styled("div")`
   width: 100%;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  background-color: #2da44e;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
 `;

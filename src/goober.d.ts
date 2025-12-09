@@ -6,6 +6,14 @@ declare namespace goober {
       text: string;
       textMuted: string;
       accent: string;
+      button: {
+        bg: string;
+        hover: string;
+        active: string;
+        disabled: string;
+        text: string;
+        disabledText: string;
+      };
     };
     fontSizes: {
       xs: string;

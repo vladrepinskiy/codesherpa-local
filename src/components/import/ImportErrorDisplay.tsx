@@ -35,12 +35,13 @@ export const ImportErrorDisplay = ({
 const ErrorText = styled("p")`
   margin: 0;
   font-size: 14px;
-  color: #86181d;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const HelpBox = styled("div")`
   padding: 15px;
-  background-color: #f6f8fa;
+  background-color: ${(props) => props.theme.palette.bg};
+  border: 1px solid ${(props) => props.theme.palette.text};
   border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
@@ -50,9 +51,11 @@ const HelpBox = styled("div")`
 const HelpTitle = styled("p")`
   margin: 0 0 10px 0;
   font-weight: 500;
+  color: ${(props) => props.theme.palette.text};
 `;
 
 const HelpList = styled("ul")`
   margin: 0;
   padding-left: 20px;
+  color: ${(props) => props.theme.palette.text};
 `;
