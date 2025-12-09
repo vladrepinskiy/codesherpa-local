@@ -1,14 +1,30 @@
 import { styled } from "goober";
+import { Route, Router, Switch } from "wouter";
 import "./App.css";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
-import { RepositoryImporter } from "./components/import/RepositoryImporter";
+import { Chat } from "./components/pages/Chat";
+import { Import } from "./components/pages/Import";
+import { Welcome } from "./components/pages/Welcome";
+import { OnboardingProvider } from "./context/onboarding.provider";
+import { ThemeProvider } from "./context/theme.provider";
 
 export const App = () => {
   return (
-    <AppContainer>
-      <RepositoryImporter />
-      <DatabaseRepl />
-    </AppContainer>
+    <ThemeProvider>
+      <OnboardingProvider>
+        <Router>
+          <AppContainer>
+            <Switch>
+              <Route path="/welcome" component={Welcome} />
+              <Route path="/import" component={Import} />
+              <Route path="/chat" component={Chat} />
+              <Route component={Welcome} />
+            </Switch>
+            <DatabaseRepl />
+          </AppContainer>
+        </Router>
+      </OnboardingProvider>
+    </ThemeProvider>
   );
 };
 
