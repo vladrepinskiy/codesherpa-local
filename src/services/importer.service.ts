@@ -18,15 +18,8 @@ import {
   TOTAL_IMPORT_STEPS,
 } from "../constants/import.constants";
 import { GitHubAPIError } from "../error/githubapi.error";
-import { insertComments } from "../lib/db/repositories/comments.repository";
-import { insertFiles } from "../lib/db/repositories/files.repository";
-import { insertIssues } from "../lib/db/repositories/issues.repository";
-import {
-  getImportStats,
-  insertRepository,
-} from "../lib/db/repositories/repo.repository";
 import type { ImportResult, ProgressCallback } from "../types/import.types";
-import { initDatabase } from "../util/db.util";
+import { getRepositories, initDatabase } from "../util/db.util";
 import { GitHubAPI } from "./github.service";
 
 export class RepositoryImporter {
@@ -70,7 +63,8 @@ export class RepositoryImporter {
     const repoData = await this.github.fetchRepository(owner, repo);
     const repoId = `${REPO_ID_PREFIX}${repoData.id}`;
 
-    await insertRepository({
+    const { repositoriesRepository } = getRepositories();
+    await repositoriesRepository.insertRepository({
       id: repoId,
       owner: repoData.owner.login,
       name: repoData.name,
@@ -117,7 +111,8 @@ export class RepositoryImporter {
         content: undefined,
       }));
 
-      await insertFiles(fileRecords);
+      const { filesRepository } = getRepositories();
+      await filesRepository.insertFiles(fileRecords);
       processedFiles += batch.length;
       this.reportProgress(
         "files",
@@ -163,9 +158,10 @@ export class RepositoryImporter {
       closed_at: issue.closed_at ? new Date(issue.closed_at) : undefined,
     }));
 
+    const { issuesRepository } = getRepositories();
     for (let i = 0; i < issueRecords.length; i += ISSUE_BATCH_SIZE) {
       const batch = issueRecords.slice(i, i + ISSUE_BATCH_SIZE);
-      await insertIssues(batch);
+      await issuesRepository.insertIssues(batch);
       this.reportProgress(
         "issues",
         3,
@@ -226,7 +222,8 @@ export class RepositoryImporter {
           : undefined,
       }));
 
-      await insertComments(commentRecords);
+      const { commentsRepository } = getRepositories();
+      await commentsRepository.insertComments(commentRecords);
       processedComments += comments.length;
       this.reportProgress(
         "comments",
@@ -244,7 +241,8 @@ export class RepositoryImporter {
       TOTAL_IMPORT_STEPS,
       "Import complete! Gathering statistics..."
     );
-    return await getImportStats(repoId);
+    const { repositoriesRepository } = getRepositories();
+    return await repositoriesRepository.getImportStats(repoId);
   }
 
   private handleImportError(error: unknown): ImportResult {

@@ -1,4 +1,5 @@
-import { getDatabase } from "../../../util/db.util";
+import type { Issue } from "../../../types/db.types";
+import { BaseRepository } from "./base.repository";
 
 export const createIssuesTable = `
   CREATE TABLE IF NOT EXISTS issues (
@@ -22,51 +23,63 @@ export const createIssuesTable = `
   CREATE INDEX IF NOT EXISTS idx_issues_state ON issues(state);
 `;
 
-export async function insertIssues(
-  issues: Array<{
-    id: string;
-    repo_id: string;
-    number: number;
-    title: string;
-    body?: string;
-    state: string;
-    type: "issue" | "pull_request";
-    author?: string;
-    labels?: any[];
-    created_at: Date;
-    updated_at?: Date;
-    closed_at?: Date;
-  }>
-): Promise<void> {
-  const db = getDatabase();
+export class IssuesRepository extends BaseRepository<Issue> {
+  protected readonly tableName = "issues";
 
-  for (const issue of issues) {
-    await db.query(
-      `INSERT INTO issues (id, repo_id, number, title, body, state, type, author, labels, created_at, updated_at, closed_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-       ON CONFLICT (repo_id, number, type) DO UPDATE SET
-         title = EXCLUDED.title,
-         body = EXCLUDED.body,
-         state = EXCLUDED.state,
-         author = EXCLUDED.author,
-         labels = EXCLUDED.labels,
-         created_at = EXCLUDED.created_at,
-         updated_at = EXCLUDED.updated_at,
-         closed_at = EXCLUDED.closed_at`,
-      [
-        issue.id,
-        issue.repo_id,
-        issue.number,
-        issue.title,
-        issue.body || null,
-        issue.state,
-        issue.type,
-        issue.author || null,
-        JSON.stringify(issue.labels || []),
-        issue.created_at,
-        issue.updated_at || null,
-        issue.closed_at || null,
-      ]
-    );
+  async readById(id: string): Promise<Issue | null> {
+    const db = this.getDatabase();
+    const result = await db.query("SELECT * FROM issues WHERE id = $1", [id]);
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0] as Issue & { labels: string };
+    return {
+      ...row,
+      labels: row.labels ? JSON.parse(row.labels) : undefined,
+      created_at: new Date(row.created_at),
+      updated_at: row.updated_at ? new Date(row.updated_at) : undefined,
+      closed_at: row.closed_at ? new Date(row.closed_at) : undefined,
+    };
+  }
+
+  async deleteById(id: string): Promise<void> {
+    const db = this.getDatabase();
+    await db.query("DELETE FROM issues WHERE id = $1", [id]);
+  }
+
+  async insertIssues(issues: Array<Issue>): Promise<void> {
+    const db = this.getDatabase();
+
+    for (const issue of issues) {
+      await db.query(
+        `INSERT INTO issues (id, repo_id, number, title, body, state, type, author, labels, created_at, updated_at, closed_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         ON CONFLICT (repo_id, number, type) DO UPDATE SET
+           title = EXCLUDED.title,
+           body = EXCLUDED.body,
+           state = EXCLUDED.state,
+           author = EXCLUDED.author,
+           labels = EXCLUDED.labels,
+           created_at = EXCLUDED.created_at,
+           updated_at = EXCLUDED.updated_at,
+           closed_at = EXCLUDED.closed_at`,
+        [
+          issue.id,
+          issue.repo_id,
+          issue.number,
+          issue.title,
+          issue.body || null,
+          issue.state,
+          issue.type,
+          issue.author || null,
+          JSON.stringify(issue.labels || []),
+          issue.created_at,
+          issue.updated_at || null,
+          issue.closed_at || null,
+        ]
+      );
+    }
   }
 }
