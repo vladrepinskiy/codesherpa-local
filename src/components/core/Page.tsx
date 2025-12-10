@@ -16,5 +16,6 @@ const PageContainer = styled("div")`
   justify-content: center;
   height: 100vh;
   margin: 0 auto;
+  overflow: hidden;
   background-color: ${(props) => props.theme.palette.bg};
 `;
