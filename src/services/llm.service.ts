@@ -1,6 +1,5 @@
 import { CreateMLCEngine, type MLCEngineInterface } from "@mlc-ai/web-llm";
-
-const MODEL_ID = "Llama-3.1-8B-Instruct-q4f32_1-MLC";
+import { MODEL_ID } from "../constants/llm.constants";
 
 let llmEngine: MLCEngineInterface | null = null;
 let isInitializing = false;
@@ -69,6 +68,10 @@ const initializeLLMEngine = async (
     initializationError = error as Error;
     throw error;
   }
+};
+
+export const isLLMInitializing = (): boolean => {
+  return isInitializing;
 };
 
 export const initializeLLM = async (

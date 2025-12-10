@@ -1,14 +1,22 @@
-import { createContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
-import { initializeLLM, type ProgressCallback } from "../services/llm.service";
+import { LLM_INITIALIZATION_STAGES } from "../constants/llm.constants";
+import {
+  initializeLLM,
+  isLLMInitializing,
+  type ProgressCallback,
+} from "../services/llm.service";
+import type { LLMInitializationStage } from "../types/llm.types";
+import { getToastMessage, updateStageFromProgress } from "../util/llm.util";
 
 type LLMContextValue = {
-  isLoading: boolean;
-  progress: number;
-  statusMessage: string;
-  error: Error | null;
   isInitialized: boolean;
-  initialize: () => Promise<void>;
 };
 
 export const LLMContext = createContext<LLMContextValue | null>(null);
@@ -18,68 +26,69 @@ type LLMProviderProps = {
 };
 
 export const LLMProvider = ({ children }: LLMProviderProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [error, setError] = useState<Error | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [toastId, setToastId] = useState<string | number | null>(null);
+  const initializationStartedRef = useRef(false);
+  const previousProgressRef = useRef<number>(-1);
+  const stageRef = useRef<LLMInitializationStage | null>(null);
+
+  const resetRefs = () => {
+    previousProgressRef.current = -1;
+    stageRef.current = null;
+  };
 
   const handleInitialize = async () => {
-    if (isInitialized) {
+    if (isInitialized || initializationStartedRef.current) return;
+
+    if (isLLMInitializing()) {
+      initializationStartedRef.current = true;
       return;
     }
 
-    setIsLoading(true);
-    setProgress(0);
-    setStatusMessage("Initializing model...");
-    setError(null);
+    initializationStartedRef.current = true;
+    previousProgressRef.current = -1;
+    stageRef.current = null;
 
-    const id = toast.loading("Loading model: 0%");
-    setToastId(id);
+    const id = toast.loading("Initializing model...");
 
     try {
       const progressCallback: ProgressCallback = (report) => {
         const progressPercent = Math.round(report.progress * 100);
-        setProgress(progressPercent);
-        setStatusMessage(report.text || "Loading model...");
+        const text = report.text || "Loading model...";
 
-        toast.loading(`Loading model: ${progressPercent}%`, { id });
+        stageRef.current = updateStageFromProgress(
+          progressPercent,
+          text,
+          previousProgressRef.current,
+          stageRef.current
+        );
+
+        previousProgressRef.current = progressPercent;
+
+        const stage = stageRef.current || LLM_INITIALIZATION_STAGES.LOADING;
+        const toastMessage = getToastMessage(stage, progressPercent);
+        toast.loading(toastMessage, { id });
       };
 
       await initializeLLM(progressCallback);
 
       setIsInitialized(true);
-      setProgress(100);
-      setStatusMessage("Model loaded successfully");
+      resetRefs();
 
       toast.success("Model loaded successfully", { id });
-      setToastId(null);
     } catch (err) {
       const error = err as Error;
-      setError(error);
-      setStatusMessage(`Error: ${error.message}`);
-
       toast.error(`Failed to load model: ${error.message}`, { id });
-      setToastId(null);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!isInitialized && !isLoading) {
+    if (!isInitialized && !initializationStartedRef.current) {
       handleInitialize();
     }
   }, []);
 
   const value: LLMContextValue = {
-    isLoading,
-    progress,
-    statusMessage,
-    error,
     isInitialized,
-    initialize: handleInitialize,
   };
 
   return <LLMContext.Provider value={value}>{children}</LLMContext.Provider>;
