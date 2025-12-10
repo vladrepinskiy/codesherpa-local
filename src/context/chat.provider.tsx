@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useEffect, useState, type ReactNode } from "react";
 import { useLocation, useParams } from "wouter";
 import { generateChatResponse } from "../services/llm.service";
 import type { Message } from "../types/db.types";
@@ -23,7 +16,9 @@ type ChatContextType = {
   retryMessage: (messageId: string) => Promise<void>;
 };
 
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
+export const ChatContext = createContext<ChatContextType | undefined>(
+  undefined
+);
 
 type ChatProviderProps = {
   children: ReactNode;
@@ -77,204 +72,192 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     loadChat();
   }, [params.chatId, isDbReady]);
 
-  const createNewChat = useCallback(async (): Promise<string> => {
+  const createNewChat = async (): Promise<string> => {
     const { chatsRepository } = getRepositories();
     const newChatId = generateId();
     await chatsRepository.insertChat(newChatId);
     return newChatId;
-  }, []);
+  };
 
-  const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || isLoading || !isDbReady) return;
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || isLoading || !isDbReady) return;
 
-      setIsLoading(true);
-      const { chatsRepository, messagesRepository } = getRepositories();
+    setIsLoading(true);
+    const { chatsRepository, messagesRepository } = getRepositories();
 
-      let currentChatId = chatId;
+    let currentChatId = chatId;
 
-      if (!currentChatId) {
-        currentChatId = await createNewChat();
-        setChatId(currentChatId);
-        setLocation(`/chat/${toShortId(currentChatId)}`);
-      }
+    if (!currentChatId) {
+      currentChatId = await createNewChat();
+      setChatId(currentChatId);
+      setLocation(`/chat/${toShortId(currentChatId)}`);
+    }
 
-      const userMessageId = generateId();
-      const userMessage: Message = {
-        id: userMessageId,
-        chat_id: currentChatId,
-        role: "user",
-        content: content.trim(),
-        status: "complete",
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
+    const userMessageId = generateId();
+    const userMessage: Message = {
+      id: userMessageId,
+      chat_id: currentChatId,
+      role: "user",
+      content: content.trim(),
+      status: "complete",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
 
-      await messagesRepository.insertMessage(
-        userMessageId,
-        currentChatId,
-        "user",
-        content.trim(),
-        "complete"
-      );
+    await messagesRepository.insertMessage(
+      userMessageId,
+      currentChatId,
+      "user",
+      content.trim(),
+      "complete"
+    );
 
-      setMessages((prev) => [...prev, userMessage]);
-      setInput("");
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
 
-      const assistantMessageId = generateId();
-      const assistantMessage: Message = {
-        id: assistantMessageId,
-        chat_id: currentChatId,
-        role: "assistant",
-        content: "",
-        status: "streaming",
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
+    const assistantMessageId = generateId();
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      chat_id: currentChatId,
+      role: "assistant",
+      content: "",
+      status: "streaming",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
 
-      await messagesRepository.insertMessage(
-        assistantMessageId,
-        currentChatId,
-        "assistant",
-        "",
-        "streaming"
-      );
+    await messagesRepository.insertMessage(
+      assistantMessageId,
+      currentChatId,
+      "assistant",
+      "",
+      "streaming"
+    );
 
-      setMessages((prev) => [...prev, assistantMessage]);
+    setMessages((prev) => [...prev, assistantMessage]);
 
-      try {
-        const allMessages = [...messages, userMessage];
-        const formattedMessages = allMessages.map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        }));
+    try {
+      const allMessages = [...messages, userMessage];
+      const formattedMessages = allMessages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
 
-        let fullContent = "";
+      let fullContent = "";
 
-        await generateChatResponse(formattedMessages, async (chunk) => {
-          fullContent += chunk;
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMessageId
-                ? { ...msg, content: fullContent }
-                : msg
-            )
-          );
-        });
-
-        await messagesRepository.updateContent(assistantMessageId, fullContent);
-        await messagesRepository.updateStatus(assistantMessageId, "complete");
-        await chatsRepository.updateTimestamp(currentChatId);
-
+      await generateChatResponse(formattedMessages, async (chunk) => {
+        fullContent += chunk;
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessageId
-              ? { ...msg, content: fullContent, status: "complete" }
+              ? { ...msg, content: fullContent }
               : msg
           )
         );
-      } catch (error) {
-        const errorContent =
-          error instanceof Error ? `Error: ${error.message}` : "Error occurred";
+      });
 
-        await messagesRepository.updateContent(
-          assistantMessageId,
-          errorContent
-        );
-        await messagesRepository.updateStatus(
-          assistantMessageId,
-          "interrupted"
-        );
+      await messagesRepository.updateContent(assistantMessageId, fullContent);
+      await messagesRepository.updateStatus(assistantMessageId, "complete");
+      await chatsRepository.updateTimestamp(currentChatId);
 
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, content: fullContent, status: "complete" }
+            : msg
+        )
+      );
+    } catch (error) {
+      const errorContent =
+        error instanceof Error ? `Error: ${error.message}` : "Error occurred";
+
+      await messagesRepository.updateContent(assistantMessageId, errorContent);
+      await messagesRepository.updateStatus(assistantMessageId, "interrupted");
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, content: errorContent, status: "interrupted" }
+            : msg
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const retryMessage = async (messageId: string) => {
+    if (isLoading || !isDbReady || !chatId) return;
+
+    const { messagesRepository, chatsRepository } = getRepositories();
+
+    const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+    if (messageIndex === -1) return;
+
+    const targetMessage = messages[messageIndex];
+    if (targetMessage.role !== "assistant") return;
+
+    setIsLoading(true);
+
+    const contextMessages = messages.slice(0, messageIndex);
+
+    await messagesRepository.updateContent(messageId, "");
+    await messagesRepository.updateStatus(messageId, "streaming");
+
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, content: "", status: "streaming" }
+          : msg
+      )
+    );
+
+    try {
+      const formattedMessages = contextMessages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
+      let fullContent = "";
+
+      await generateChatResponse(formattedMessages, async (chunk) => {
+        fullContent += chunk;
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === assistantMessageId
-              ? { ...msg, content: errorContent, status: "interrupted" }
-              : msg
+            msg.id === messageId ? { ...msg, content: fullContent } : msg
           )
         );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [chatId, messages, isLoading, isDbReady, createNewChat, setLocation]
-  );
+      });
 
-  const retryMessage = useCallback(
-    async (messageId: string) => {
-      if (isLoading || !isDbReady || !chatId) return;
-
-      const { messagesRepository, chatsRepository } = getRepositories();
-
-      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
-      if (messageIndex === -1) return;
-
-      const targetMessage = messages[messageIndex];
-      if (targetMessage.role !== "assistant") return;
-
-      setIsLoading(true);
-
-      const contextMessages = messages.slice(0, messageIndex);
-
-      await messagesRepository.updateContent(messageId, "");
-      await messagesRepository.updateStatus(messageId, "streaming");
+      await messagesRepository.updateContent(messageId, fullContent);
+      await messagesRepository.updateStatus(messageId, "complete");
+      await chatsRepository.updateTimestamp(chatId);
 
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId
-            ? { ...msg, content: "", status: "streaming" }
+            ? { ...msg, content: fullContent, status: "complete" }
             : msg
         )
       );
+    } catch (error) {
+      const errorContent =
+        error instanceof Error ? `Error: ${error.message}` : "Error occurred";
 
-      try {
-        const formattedMessages = contextMessages.map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        }));
+      await messagesRepository.updateContent(messageId, errorContent);
+      await messagesRepository.updateStatus(messageId, "interrupted");
 
-        let fullContent = "";
-
-        await generateChatResponse(formattedMessages, async (chunk) => {
-          fullContent += chunk;
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === messageId ? { ...msg, content: fullContent } : msg
-            )
-          );
-        });
-
-        await messagesRepository.updateContent(messageId, fullContent);
-        await messagesRepository.updateStatus(messageId, "complete");
-        await chatsRepository.updateTimestamp(chatId);
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId
-              ? { ...msg, content: fullContent, status: "complete" }
-              : msg
-          )
-        );
-      } catch (error) {
-        const errorContent =
-          error instanceof Error ? `Error: ${error.message}` : "Error occurred";
-
-        await messagesRepository.updateContent(messageId, errorContent);
-        await messagesRepository.updateStatus(messageId, "interrupted");
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId
-              ? { ...msg, content: errorContent, status: "interrupted" }
-              : msg
-          )
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [chatId, messages, isLoading, isDbReady]
-  );
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, content: errorContent, status: "interrupted" }
+            : msg
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ChatContext.Provider
@@ -292,12 +275,4 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       {children}
     </ChatContext.Provider>
   );
-};
-
-export const useChat = (): ChatContextType => {
-  const context = useContext(ChatContext);
-  if (!context) {
-    throw new Error("useChat must be used within a ChatProvider");
-  }
-  return context;
 };

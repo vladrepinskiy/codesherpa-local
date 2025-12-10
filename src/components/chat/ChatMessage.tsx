@@ -1,8 +1,8 @@
 import { styled } from "goober";
-import type { ChatMessage as ChatMessageType } from "../../types/llm.types";
+import type { Message } from "../../types/db.types";
 
 type ChatMessageProps = {
-  message: ChatMessageType;
+  message: Message;
 };
 
 export const ChatMessage = ({ message }: ChatMessageProps) => {

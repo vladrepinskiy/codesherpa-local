@@ -1,42 +1,43 @@
 import { styled } from "goober";
+import { useLLM } from "../../hooks/useLLM";
+import { useChat } from "../../hooks/useChat";
 import { ChatInput } from "../chat/ChatInput";
 import { ChatLoadingSpinner } from "../chat/ChatLoadingSpinner";
 import { ChatMessageList } from "../chat/ChatMessageList";
-import { useChat } from "../../hooks/useChat";
-import { useLLM } from "../../hooks/useLLM";
-import { Page } from "./Page";
 
 export const Chat = () => {
   const { isInitialized } = useLLM();
-  const {
-    messages,
-    input,
-    isLoading,
-    isDbReady,
-    handleInputChange,
-    handleSubmit,
-  } = useChat();
+  const { messages, input, setInput, isLoading, isDbReady, sendMessage } =
+    useChat();
 
   if (!isInitialized || !isDbReady) {
-    return (
-      <Page>
-        <ChatLoadingSpinner />
-      </Page>
-    );
+    return <ChatLoadingSpinner />;
   }
 
+  const handleInputChange = (value: string) => {
+    setInput(value);
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+
+    if (!isInitialized || !isDbReady || !input.trim() || isLoading) {
+      return;
+    }
+
+    await sendMessage(input);
+  };
+
   return (
-    <Page>
-      <ChatContainer>
-        <ChatMessageList messages={messages} />
-        <ChatInput
-          value={input}
-          onChange={handleInputChange}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-        />
-      </ChatContainer>
-    </Page>
+    <ChatContainer>
+      <ChatMessageList messages={messages} />
+      <ChatInput
+        value={input}
+        onChange={handleInputChange}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+      />
+    </ChatContainer>
   );
 };
 
@@ -51,4 +52,3 @@ const ChatContainer = styled("div")`
   border-radius: 0.5rem;
   overflow: hidden;
 `;
-
