@@ -1,6 +1,7 @@
 import { styled } from "goober";
 import { Toaster } from "sonner";
 import { Route, Router, Switch } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import "./App.css";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { ThemeToggle } from "./components/core/ThemeToggle";
@@ -16,7 +17,7 @@ export const App = () => {
     <ThemeProvider>
       <LLMProvider>
         <OnboardingProvider>
-          <Router>
+          <Router hook={useHashLocation}>
             <AppContainer>
               <Toaster />
               <ThemeToggle />
