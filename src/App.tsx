@@ -4,6 +4,7 @@ import { Route, Router, Switch } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
 import "./App.css";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
+import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
 import { ThemeToggle } from "./components/core/ThemeToggle";
 import { ChatPage } from "./components/pages/ChatPage";
 import { Import } from "./components/pages/Import";
@@ -18,6 +19,7 @@ export const App = () => {
       <LLMProvider>
         <OnboardingProvider>
           <Router hook={useHashLocation}>
+            <HashRouteNormalizer />
             <AppContainer>
               <Toaster />
               <ThemeToggle />
