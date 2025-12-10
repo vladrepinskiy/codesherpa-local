@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { LLM_INITIALIZATION_STAGES } from "../constants/llm.constants";
 import {
+  checkIfModelAlreadyLoaded,
   initializeLLM,
   isLLMInitializing,
   type ProgressCallback,
@@ -48,10 +49,21 @@ export const LLMProvider = ({ children }: LLMProviderProps) => {
     previousProgressRef.current = -1;
     stageRef.current = null;
 
-    const id = toast.loading("Initializing model...");
+    let id: string | number | null = null;
+    let hasProgress = false;
 
     try {
+      const alreadyLoaded = await checkIfModelAlreadyLoaded();
+      if (alreadyLoaded) {
+        setIsInitialized(true);
+        resetRefs();
+        return;
+      }
+
+      id = toast.loading("Initializing model...");
+
       const progressCallback: ProgressCallback = (report) => {
+        hasProgress = true;
         const progressPercent = Math.round(report.progress * 100);
         const text = report.text || "Loading model...";
 
@@ -66,7 +78,9 @@ export const LLMProvider = ({ children }: LLMProviderProps) => {
 
         const stage = stageRef.current || LLM_INITIALIZATION_STAGES.LOADING;
         const toastMessage = getToastMessage(stage, progressPercent);
-        toast.loading(toastMessage, { id });
+        if (id) {
+          toast.loading(toastMessage, { id });
+        }
       };
 
       await initializeLLM(progressCallback);
@@ -74,10 +88,16 @@ export const LLMProvider = ({ children }: LLMProviderProps) => {
       setIsInitialized(true);
       resetRefs();
 
-      toast.success("Model loaded successfully", { id });
+      if (id && hasProgress) {
+        toast.success("Model loaded successfully", { id });
+      } else if (id) {
+        toast.dismiss(id);
+      }
     } catch (err) {
       const error = err as Error;
-      toast.error(`Failed to load model: ${error.message}`, { id });
+      if (id) {
+        toast.error(`Failed to load model: ${error.message}`, { id });
+      }
     }
   };
 
