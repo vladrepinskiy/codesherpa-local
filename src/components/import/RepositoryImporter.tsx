@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
-import { useOnboarding } from "../../hooks/useOnboarding";
 import { RepositoryImporter as ImporterService } from "../../services/importer.service";
 import type { ImportState } from "../../types/import.types";
 import { ImportErrorDisplay } from "./ImportErrorDisplay";
@@ -10,35 +8,6 @@ import { ImportStats } from "./ImportStats";
 
 export const RepositoryImporter = () => {
   const [state, setState] = useState<ImportState>({ status: "idle" });
-  const [, setLocation] = useLocation();
-  const { setOnboardingStatus } = useOnboarding();
-
-  // Warn user if they try to leave during import
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (state.status === "importing") {
-        e.preventDefault();
-        return "";
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [state.status]);
-
-  // Redirect to /chat after successful import
-  useEffect(() => {
-    if (state.status === "success") {
-      setOnboardingStatus("completed");
-      const timer = setTimeout(() => {
-        setLocation("/chat");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [state.status, setLocation, setOnboardingStatus]);
 
   const handleImport = async (repoUrl: string, token?: string) => {
     setState({ status: "idle" });
@@ -62,6 +31,21 @@ export const RepositoryImporter = () => {
   const handleReset = () => {
     setState({ status: "idle" });
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (state.status === "importing") {
+        e.preventDefault();
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [state.status]);
 
   return (
     <>

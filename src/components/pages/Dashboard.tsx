@@ -4,13 +4,17 @@ import { useLocation } from "wouter";
 import { Page } from "../core/Page";
 import { initDatabase } from "../../util/db.util";
 import { getRepositories } from "../../util/db.util";
-import { importDemoRepository } from "../../util/demo-repo.util";
+import { importDemoRepository } from "../../util/demo.util";
 import type { Repository } from "../../types/db.types";
 
 export const Dashboard = () => {
   const [, setLocation] = useLocation();
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleImportClick = () => {
+    setLocation("/import");
+  };
 
   useEffect(() => {
     const loadRepositories = async () => {
@@ -29,10 +33,6 @@ export const Dashboard = () => {
 
     loadRepositories();
   }, []);
-
-  const handleImportClick = () => {
-    setLocation("/import");
-  };
 
   if (loading) {
     return (

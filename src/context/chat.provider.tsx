@@ -34,44 +34,6 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [isDbReady, setIsDbReady] = useState(false);
   const [input, setInput] = useState("");
 
-  useEffect(() => {
-    const init = async () => {
-      await initDatabase();
-      setIsDbReady(true);
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (!isDbReady) return;
-
-    const loadChat = async () => {
-      const shortId = params.chatId;
-
-      if (!shortId) {
-        setChatId(null);
-        setMessages([]);
-        return;
-      }
-
-      const { chatsRepository, messagesRepository } = getRepositories();
-      const chat = await chatsRepository.readByShortId(shortId);
-
-      if (chat) {
-        setChatId(chat.id);
-        const chatMessages = await messagesRepository.getMessagesByChatId(
-          chat.id
-        );
-        setMessages(chatMessages);
-      } else {
-        setChatId(null);
-        setMessages([]);
-      }
-    };
-
-    loadChat();
-  }, [params.chatId, isDbReady]);
-
   const createNewChat = async (): Promise<string> => {
     const { chatsRepository } = getRepositories();
     const newChatId = generateId();
@@ -258,6 +220,44 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+      await initDatabase();
+      setIsDbReady(true);
+    };
+    init();
+  }, []);
+
+  useEffect(() => {
+    if (!isDbReady) return;
+
+    const loadChat = async () => {
+      const shortId = params.chatId;
+
+      if (!shortId) {
+        setChatId(null);
+        setMessages([]);
+        return;
+      }
+
+      const { chatsRepository, messagesRepository } = getRepositories();
+      const chat = await chatsRepository.readByShortId(shortId);
+
+      if (chat) {
+        setChatId(chat.id);
+        const chatMessages = await messagesRepository.getMessagesByChatId(
+          chat.id
+        );
+        setMessages(chatMessages);
+      } else {
+        setChatId(null);
+        setMessages([]);
+      }
+    };
+
+    loadChat();
+  }, [params.chatId, isDbReady]);
 
   return (
     <ChatContext.Provider
