@@ -73,6 +73,18 @@ export class RepositoriesRepository extends BaseRepository<Repository> {
     await db.query("DELETE FROM repositories WHERE id = $1", [repoId]);
   }
 
+  async getAllRepositories(): Promise<Repository[]> {
+    const db = this.getDatabase();
+    const result = await db.query(
+      "SELECT * FROM repositories ORDER BY imported_at DESC"
+    );
+
+    return (result.rows as Repository[]).map((row) => ({
+      ...row,
+      imported_at: new Date(row.imported_at),
+    }));
+  }
+
   async getImportStats(repoId: string): Promise<ImportStats> {
     const db = this.getDatabase();
 

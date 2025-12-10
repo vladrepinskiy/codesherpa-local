@@ -50,7 +50,9 @@ export class FilesRepository extends BaseRepository<File> {
       await db.query(
         `INSERT INTO files (id, repo_id, path, content, size, type, sha, last_modified)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (repo_id, path) DO UPDATE SET
+         ON CONFLICT (id) DO UPDATE SET
+           repo_id = EXCLUDED.repo_id,
+           path = EXCLUDED.path,
            content = EXCLUDED.content,
            size = EXCLUDED.size,
            type = EXCLUDED.type,

@@ -44,6 +44,8 @@ export const TOTAL_IMPORT_STEPS = 5 as const;
 
 export const REPO_ID_PREFIX = "github-" as const;
 
+export const DEMO_REPO_ID_PREFIX = "demo-" as const;
+
 export const FILE_ID_PREFIX = "file-" as const;
 
 export const ISSUE_ID_PREFIX = "issue-" as const;

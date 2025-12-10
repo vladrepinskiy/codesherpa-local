@@ -56,10 +56,13 @@ export class IssuesRepository extends BaseRepository<Issue> {
       await db.query(
         `INSERT INTO issues (id, repo_id, number, title, body, state, type, author, labels, created_at, updated_at, closed_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-         ON CONFLICT (repo_id, number, type) DO UPDATE SET
+         ON CONFLICT (id) DO UPDATE SET
+           repo_id = EXCLUDED.repo_id,
+           number = EXCLUDED.number,
            title = EXCLUDED.title,
            body = EXCLUDED.body,
            state = EXCLUDED.state,
+           type = EXCLUDED.type,
            author = EXCLUDED.author,
            labels = EXCLUDED.labels,
            created_at = EXCLUDED.created_at,
