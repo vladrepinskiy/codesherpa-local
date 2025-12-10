@@ -1,17 +1,23 @@
 import { styled } from "goober";
-import { Page } from "../core/Page";
 import { ChatInput } from "../chat/ChatInput";
 import { ChatLoadingSpinner } from "../chat/ChatLoadingSpinner";
 import { ChatMessageList } from "../chat/ChatMessageList";
 import { useChat } from "../../hooks/useChat";
 import { useLLM } from "../../hooks/useLLM";
+import { Page } from "./Page";
 
 export const Chat = () => {
   const { isInitialized } = useLLM();
-  const { messages, input, isLoading, handleInputChange, handleSubmit } =
-    useChat();
+  const {
+    messages,
+    input,
+    isLoading,
+    isDbReady,
+    handleInputChange,
+    handleSubmit,
+  } = useChat();
 
-  if (!isInitialized) {
+  if (!isInitialized || !isDbReady) {
     return (
       <Page>
         <ChatLoadingSpinner />
@@ -45,3 +51,4 @@ const ChatContainer = styled("div")`
   border-radius: 0.5rem;
   overflow: hidden;
 `;
+

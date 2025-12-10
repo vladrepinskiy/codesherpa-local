@@ -4,7 +4,7 @@ import { Route, Router, Switch } from "wouter";
 import "./App.css";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { ThemeToggle } from "./components/core/ThemeToggle";
-import { Chat } from "./components/pages/Chat";
+import { ChatPage } from "./components/pages/ChatPage";
 import { Import } from "./components/pages/Import";
 import { Welcome } from "./components/pages/Welcome";
 import { LLMProvider } from "./context/llm.provider";
@@ -23,7 +23,8 @@ export const App = () => {
               <Switch>
                 <Route path="/welcome" component={Welcome} />
                 <Route path="/import" component={Import} />
-                <Route path="/chat" component={Chat} />
+                <Route path="/chat/:chatId" component={ChatPage} />
+                <Route path="/chat" component={ChatPage} />
                 <Route component={Welcome} />
               </Switch>
               <DatabaseRepl />
