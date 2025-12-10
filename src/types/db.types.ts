@@ -1,3 +1,5 @@
+import type { ValueOf } from "./util.types";
+
 export type Comment = {
   id: string;
   issue_id: string;
@@ -51,4 +53,29 @@ export type ImportStats = {
   issuesCount: number;
   pullRequestsCount: number;
   commentsCount: number;
+};
+
+const MESSAGE_STATUS = {
+  COMPLETE: "complete",
+  STREAMING: "streaming",
+  INTERRUPTED: "interrupted",
+} as const;
+
+export type MessageStatus = ValueOf<typeof MESSAGE_STATUS>;
+
+export type Chat = {
+  id: string;
+  title?: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type Message = {
+  id: string;
+  chat_id: string;
+  role: "user" | "assistant";
+  content: string;
+  status: MessageStatus;
+  created_at: Date;
+  updated_at: Date;
 };
