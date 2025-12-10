@@ -14,6 +14,7 @@
     "@electric-sql/pglite-repl": "^0.2.32",
     "@mlc-ai/web-llm": "^0.2.80",
     "goober": "^2.1.18",
+    "nanoid": "^5.1.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "sonner": "^2.0.7",
