@@ -43,7 +43,10 @@ export const ChatInput = ({
             }
           }}
         />
-        <SendButton type="submit" disabled={disabled || isLoading || !value.trim()}>
+        <SendButton
+          type="submit"
+          disabled={disabled || isLoading || !value.trim()}
+        >
           {isLoading ? "..." : "Send"}
         </SendButton>
       </InputContainer>

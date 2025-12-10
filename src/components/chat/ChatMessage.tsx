@@ -15,7 +15,8 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
 
 const MessageContainer = styled("div")<{ $role: "user" | "assistant" }>`
   display: flex;
-  justify-content: ${(props) => (props.$role === "user" ? "flex-end" : "flex-start")};
+  justify-content: ${(props) =>
+    props.$role === "user" ? "flex-end" : "flex-start"};
   margin-bottom: 1rem;
 `;
 
@@ -28,9 +29,7 @@ const MessageContent = styled("div")<{ $role: "user" | "assistant" }>`
       ? props.theme.palette.accent
       : props.theme.palette.button.bg};
   color: ${(props) =>
-    props.$role === "user"
-      ? "#ffffff"
-      : props.theme.palette.text};
+    props.$role === "user" ? "#ffffff" : props.theme.palette.text};
   font-size: ${(props) => props.theme.fontSizes.md};
   line-height: 1.5;
   word-wrap: break-word;
