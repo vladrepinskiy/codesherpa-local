@@ -1,13 +1,13 @@
 import { ServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 
-const _handler = new ServiceWorkerMLCEngineHandler();
+new ServiceWorkerMLCEngineHandler();
 
 const swSelf = self as any;
 
-swSelf.addEventListener("install", (event: any) => {
+swSelf.addEventListener("install", (_event: any) => {
   swSelf.skipWaiting();
 });
 
-swSelf.addEventListener("activate", (event: any) => {
+swSelf.addEventListener("activate", (_event: any) => {
   swSelf.clients.claim();
 });
