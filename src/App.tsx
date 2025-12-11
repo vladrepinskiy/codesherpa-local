@@ -2,14 +2,13 @@ import { styled } from "goober";
 import { Toaster } from "sonner";
 import { Route, Router, Switch } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
-import "./App.css";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
 import { ThemeToggle } from "./components/core/ThemeToggle";
 import { ChatPage } from "./components/pages/ChatPage";
 import { Dashboard } from "./components/pages/Dashboard";
 import { RepoPage } from "./components/pages/RepoPage";
-import { Welcome } from "./components/pages/Welcome";
+import { PageWelcome } from "./components/pages/PageWelcome";
 import { LLMProvider } from "./context/llm.provider";
 import { OnboardingProvider } from "./context/onboarding.provider";
 import { ThemeProvider } from "./context/theme.provider";
@@ -26,7 +25,7 @@ export const App = () => {
               <ThemeToggle />
               <Switch>
                 <Route path="/" component={Dashboard} />
-                <Route path="/welcome" component={Welcome} />
+                <Route path="/welcome" component={PageWelcome} />
                 <Route
                   path="/repo/:repoShortId/chat/:chatShortId"
                   component={ChatPage}

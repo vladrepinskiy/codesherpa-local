@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { Button } from "../core/Button";
 import { Page } from "../core/Page";
 
-export const Welcome = () => {
-  const [, setLocation] = useLocation();
+export const PageWelcome = () => {
+  const [_location, setLocation] = useLocation();
 
   const handleGoToDashboard = () => {
     setLocation("/");
@@ -17,12 +17,11 @@ export const Welcome = () => {
         <Description>
           CodeSherpa Local is a client-side GitHub repository importer that
           fetches repository data (files, issues, PRs, comments) via GitHub API
-          and stores it in a PGLite database persisted to IndexedDB. Explore
-          your repository data locally with our interactive SQL terminal.
+          and stores it in a PGLite database persisted to IndexedDB.
         </Description>
+        <Description>Proper walkthgough TBA soon 🚀</Description>
         <ButtonContainer>
-          <Button onClick={handleGoToDashboard}>Go to Dashboard</Button>
-          <Button onClick={() => {}}>Chat Demo</Button>
+          <Button onClick={handleGoToDashboard}>Continue to Dashboard</Button>
         </ButtonContainer>
       </WelcomeContainer>
     </Page>
