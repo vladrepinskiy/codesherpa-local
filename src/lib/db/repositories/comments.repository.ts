@@ -39,25 +39,48 @@ export class CommentsRepository extends BaseRepository<Comment> {
   }
 
   async insertComments(comments: Array<Comment>): Promise<void> {
-    const db = this.getDatabase();
+    if (comments.length === 0) return;
 
-    for (const comment of comments) {
-      await db.query(
-        `INSERT INTO comments (id, issue_id, body, author, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (id) DO UPDATE SET
-           body = EXCLUDED.body,
-           author = EXCLUDED.author,
-           created_at = EXCLUDED.created_at,
-           updated_at = EXCLUDED.updated_at`,
-        [
+    const db = this.getDatabase();
+    const batchSize = this.DB_BATCH_SIZE;
+
+    for (let i = 0; i < comments.length; i += batchSize) {
+      const batch = comments.slice(i, i + batchSize);
+
+      // Deduplicate by ID (keep last occurrence)
+      const uniqueBatch = Array.from(
+        new Map(batch.map((comment) => [comment.id, comment])).values()
+      );
+
+      const values: any[] = [];
+      const placeholders: string[] = [];
+
+      uniqueBatch.forEach((comment, index) => {
+        const baseIndex = index * 6;
+        placeholders.push(
+          `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${
+            baseIndex + 4
+          }, $${baseIndex + 5}, $${baseIndex + 6})`
+        );
+        values.push(
           comment.id,
           comment.issue_id,
           comment.body || null,
           comment.author || null,
           comment.created_at,
-          comment.updated_at || null,
-        ]
+          comment.updated_at || null
+        );
+      });
+
+      await db.query(
+        `INSERT INTO comments (id, issue_id, body, author, created_at, updated_at)
+         VALUES ${placeholders.join(", ")}
+         ON CONFLICT (id) DO UPDATE SET
+           body = EXCLUDED.body,
+           author = EXCLUDED.author,
+           created_at = EXCLUDED.created_at,
+           updated_at = EXCLUDED.updated_at`,
+        values
       );
     }
   }

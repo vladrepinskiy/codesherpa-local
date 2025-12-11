@@ -44,12 +44,46 @@ export class FilesRepository extends BaseRepository<File> {
   }
 
   async insertFiles(files: Array<File>): Promise<void> {
-    const db = this.getDatabase();
+    if (files.length === 0) return;
 
-    for (const file of files) {
+    const db = this.getDatabase();
+    const batchSize = this.DB_BATCH_SIZE;
+
+    for (let i = 0; i < files.length; i += batchSize) {
+      const batch = files.slice(i, i + batchSize);
+
+      // Deduplicate by ID (keep last occurrence)
+      const uniqueBatch = Array.from(
+        new Map(batch.map((file) => [file.id, file])).values()
+      );
+
+      const values: any[] = [];
+      const placeholders: string[] = [];
+
+      uniqueBatch.forEach((file, index) => {
+        const baseIndex = index * 8;
+        placeholders.push(
+          `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${
+            baseIndex + 4
+          }, $${baseIndex + 5}, $${baseIndex + 6}, $${baseIndex + 7}, $${
+            baseIndex + 8
+          })`
+        );
+        values.push(
+          file.id,
+          file.repo_id,
+          file.path,
+          file.content || null,
+          file.size || null,
+          file.type || null,
+          file.sha || null,
+          file.last_modified || null
+        );
+      });
+
       await db.query(
         `INSERT INTO files (id, repo_id, path, content, size, type, sha, last_modified)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         VALUES ${placeholders.join(", ")}
          ON CONFLICT (id) DO UPDATE SET
            repo_id = EXCLUDED.repo_id,
            path = EXCLUDED.path,
@@ -58,16 +92,7 @@ export class FilesRepository extends BaseRepository<File> {
            type = EXCLUDED.type,
            sha = EXCLUDED.sha,
            last_modified = EXCLUDED.last_modified`,
-        [
-          file.id,
-          file.repo_id,
-          file.path,
-          file.content || null,
-          file.size || null,
-          file.type || null,
-          file.sha || null,
-          file.last_modified || null,
-        ]
+        values
       );
     }
   }
