@@ -1,9 +1,9 @@
 import { styled } from "goober";
 import { useLLM } from "../../hooks/useLLM";
 import { useChat } from "../../hooks/useChat";
-import { ChatInput } from "../chat/ChatInput";
-import { ChatLoadingSpinner } from "../chat/ChatLoadingSpinner";
-import { ChatMessageList } from "../chat/ChatMessageList";
+import { ChatInput } from "./ChatInput";
+import { ChatLoadingSpinner } from "./ChatLoadingSpinner";
+import { ChatMessageList } from "./ChatMessageList";
 
 export const Chat = () => {
   const { isInitialized } = useLLM();

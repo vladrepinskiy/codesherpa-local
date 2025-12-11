@@ -10,6 +10,7 @@ type RepositoryImporterProps = {
   onImportSuccess?: () => void;
 };
 
+// todo: move the import logic into provider/service, dumb down this component
 export const RepositoryImporter = ({
   onImportSuccess,
 }: RepositoryImporterProps) => {
