@@ -4,9 +4,14 @@ import { useLocation } from "wouter";
 import { ROUTE_TITLES } from "../../constants/routes.constants";
 import { getRepositories } from "../../util/db.util";
 
+type BreadcrumbItem = {
+  label: string;
+  path: string;
+};
+
 export const Breadcrumbs = () => {
   const [location] = useLocation();
-  const [breadcrumbs, setBreadcrumbs] = useState<string[]>([]);
+  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // todo: sort out this mess, using session provider and new data flow
@@ -14,10 +19,10 @@ export const Breadcrumbs = () => {
     const loadBreadcrumbs = async () => {
       setLoading(true);
       try {
-        const crumbs: string[] = [];
+        const crumbs: BreadcrumbItem[] = [];
 
         if (location === "/") {
-          crumbs.push(ROUTE_TITLES["/"] || "Dashboard");
+          crumbs.push({ label: ROUTE_TITLES["/"] || "Dashboard", path: "/" });
         } else if (location.startsWith("/repo/")) {
           const pathParts = location.split("/").filter(Boolean);
           const repoIndex = pathParts.indexOf("repo");
@@ -31,6 +36,8 @@ export const Breadcrumbs = () => {
               ? pathParts[chatIndex + 1]
               : null;
 
+          crumbs.push({ label: ROUTE_TITLES["/"] || "Dashboard", path: "/" });
+
           if (repoShortId) {
             const { repositoriesRepository, chatsRepository } =
               getRepositories();
@@ -38,24 +45,29 @@ export const Breadcrumbs = () => {
               repoShortId
             );
 
+            const repoPath = `/repo/${repoShortId}`;
             if (repo) {
-              crumbs.push("repo");
-              crumbs.push(repo.full_name);
-
-              if (chatShortId) {
-                crumbs.push("chat");
-                const chat = await chatsRepository.readByShortId(chatShortId);
-                if (chat) {
-                  crumbs.push(chat.title || chatShortId);
-                } else {
-                  crumbs.push(chatShortId);
-                }
-              } else if (location.includes("/chat")) {
-                crumbs.push("chat");
-              }
+              crumbs.push({ label: repo.full_name, path: repoPath });
             } else {
-              crumbs.push("repo");
-              crumbs.push(repoShortId);
+              crumbs.push({ label: repoShortId, path: repoPath });
+            }
+
+            if (chatShortId) {
+              const chat = await chatsRepository.readByShortId(chatShortId);
+              const chatPath = `/repo/${repoShortId}/chat/${chatShortId}`;
+              if (chat) {
+                crumbs.push({
+                  label: chat.title || chatShortId,
+                  path: chatPath,
+                });
+              } else {
+                crumbs.push({ label: chatShortId, path: chatPath });
+              }
+            } else if (location.includes("/chat")) {
+              crumbs.push({
+                label: ROUTE_TITLES["/chat"] || "New Chat",
+                path: `/repo/${repoShortId}/chat`,
+              });
             }
           }
         } else if (location.startsWith("/chat/")) {
@@ -66,32 +78,41 @@ export const Breadcrumbs = () => {
               ? pathParts[chatIndex + 1]
               : null;
 
-          crumbs.push("chat");
+          crumbs.push({ label: ROUTE_TITLES["/"] || "Dashboard", path: "/" });
 
           if (chatId) {
             const { chatsRepository } = getRepositories();
             const chat = await chatsRepository.readByShortId(chatId);
+            const chatPath = `/chat/${chatId}`;
             if (chat) {
-              crumbs.push(chat.title || chatId);
+              crumbs.push({
+                label: chat.title || chatId,
+                path: chatPath,
+              });
             } else {
-              crumbs.push(chatId);
+              crumbs.push({ label: chatId, path: chatPath });
             }
           }
         } else if (location === "/chat") {
-          crumbs.push(ROUTE_TITLES["/chat"] || "New Chat");
+          crumbs.push({ label: ROUTE_TITLES["/"] || "Dashboard", path: "/" });
+          crumbs.push({
+            label: ROUTE_TITLES["/chat"] || "New Chat",
+            path: "/chat",
+          });
         } else {
+          crumbs.push({ label: ROUTE_TITLES["/"] || "Dashboard", path: "/" });
           const title = ROUTE_TITLES[location];
           if (title) {
-            crumbs.push(title);
+            crumbs.push({ label: title, path: location });
           } else {
-            crumbs.push(location);
+            crumbs.push({ label: location, path: location });
           }
         }
 
         setBreadcrumbs(crumbs);
       } catch (error) {
         console.error("Failed to load breadcrumbs:", error);
-        setBreadcrumbs([location]);
+        setBreadcrumbs([{ label: location, path: location }]);
       } finally {
         setLoading(false);
       }
@@ -106,12 +127,21 @@ export const Breadcrumbs = () => {
 
   return (
     <BreadcrumbsContainer>
-      {breadcrumbs.map((crumb, index) => (
-        <span key={index}>
-          <BreadcrumbItem>{crumb}</BreadcrumbItem>
-          {index < breadcrumbs.length - 1 && <Separator>{" > "}</Separator>}
-        </span>
-      ))}
+      {breadcrumbs.map((crumb, index) => {
+        const isLast = index === breadcrumbs.length - 1;
+        return (
+          <span key={index}>
+            {isLast ? (
+              <BreadcrumbItem>{crumb.label}</BreadcrumbItem>
+            ) : (
+              <BreadcrumbLink href={`#${crumb.path}`}>
+                {crumb.label}
+              </BreadcrumbLink>
+            )}
+            {!isLast && <Separator>{" > "}</Separator>}
+          </span>
+        );
+      })}
     </BreadcrumbsContainer>
   );
 };
@@ -129,6 +159,18 @@ const BreadcrumbsContainer = styled("div")`
 
 const BreadcrumbItem = styled("span")`
   color: ${(props) => props.theme.palette.text};
+`;
+
+const BreadcrumbLink = styled("a")`
+  color: ${(props) => props.theme.palette.text};
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+  }
 `;
 
 const Separator = styled("span")`
