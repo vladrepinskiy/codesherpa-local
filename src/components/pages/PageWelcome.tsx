@@ -19,7 +19,7 @@ export const PageWelcome = () => {
           fetches repository data (files, issues, PRs, comments) via GitHub API
           and stores it in a PGLite database persisted to IndexedDB.
         </Description>
-        <Description>Proper walkthgough TBA soon 🚀</Description>
+        <Description>Proper walkthrough TBA soon 🚀</Description>
         <ButtonContainer>
           <Button onClick={handleGoToDashboard}>Continue to Dashboard</Button>
         </ButtonContainer>
