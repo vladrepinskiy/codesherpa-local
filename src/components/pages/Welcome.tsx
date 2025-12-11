@@ -6,12 +6,8 @@ import { Page } from "../core/Page";
 export const Welcome = () => {
   const [, setLocation] = useLocation();
 
-  const handleGoToImport = () => {
-    setLocation("/import");
-  };
-
-  const handleGoToChat = () => {
-    setLocation("/chat");
+  const handleGoToDashboard = () => {
+    setLocation("/");
   };
 
   return (
@@ -25,8 +21,8 @@ export const Welcome = () => {
           your repository data locally with our interactive SQL terminal.
         </Description>
         <ButtonContainer>
-          <Button onClick={handleGoToImport}>Import Repository</Button>
-          <Button onClick={handleGoToChat}>Go to Chat</Button>
+          <Button onClick={handleGoToDashboard}>Go to Dashboard</Button>
+          <Button onClick={() => {}}>Chat Demo</Button>
         </ButtonContainer>
       </WelcomeContainer>
     </Page>

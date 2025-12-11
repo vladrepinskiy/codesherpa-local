@@ -66,3 +66,10 @@ export const ERROR_MESSAGE_INVALID_URL = "Invalid GitHub repository URL";
 
 export const ERROR_MESSAGE_REPO_NOT_FOUND =
   "Repository not found. Please check the URL and make sure the repository is public.";
+
+export const REPOSITORY_IMPORT_STATUS = {
+  PENDING: "pending",
+  IMPORTING: "importing",
+  COMPLETE: "complete",
+  ERROR: "error",
+} as const;

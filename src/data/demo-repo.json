@@ -6,7 +6,8 @@
     "full_name": "emilkowalski/sonner",
     "url": "https://github.com/emilkowalski/sonner",
     "description": "An opinionated toast component for React.",
-    "default_branch": "main"
+    "default_branch": "main",
+    "status": "complete"
   },
   "files": [
     {

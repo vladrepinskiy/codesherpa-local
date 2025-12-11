@@ -14,6 +14,7 @@ export const createReposTable = `
     url TEXT NOT NULL,
     description TEXT,
     default_branch TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
     imported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 `;
@@ -38,6 +39,24 @@ export class RepositoriesRepository extends BaseRepository<Repository> {
     };
   }
 
+  async readByShortId(shortId: string): Promise<Repository | null> {
+    const db = this.getDatabase();
+    const result = await db.query(
+      "SELECT * FROM repositories WHERE id LIKE $1 ORDER BY imported_at DESC LIMIT 1",
+      [`${shortId}%`]
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0] as Repository;
+    return {
+      ...row,
+      imported_at: new Date(row.imported_at),
+    };
+  }
+
   async deleteById(id: string): Promise<void> {
     const db = this.getDatabase();
     await db.query("DELETE FROM repositories WHERE id = $1", [id]);
@@ -46,8 +65,8 @@ export class RepositoriesRepository extends BaseRepository<Repository> {
   async insertRepository(data: InsertRepository): Promise<void> {
     const db = this.getDatabase();
     await db.query(
-      `INSERT INTO repositories (id, owner, name, full_name, url, description, default_branch)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO repositories (id, owner, name, full_name, url, description, default_branch, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (id) DO UPDATE SET
          owner = EXCLUDED.owner,
          name = EXCLUDED.name,
@@ -55,6 +74,7 @@ export class RepositoriesRepository extends BaseRepository<Repository> {
          url = EXCLUDED.url,
          description = EXCLUDED.description,
          default_branch = EXCLUDED.default_branch,
+         status = EXCLUDED.status,
          imported_at = CURRENT_TIMESTAMP`,
       [
         data.id,
@@ -64,8 +84,17 @@ export class RepositoriesRepository extends BaseRepository<Repository> {
         data.url,
         data.description || null,
         data.default_branch || null,
+        data.status,
       ]
     );
+  }
+
+  async updateStatus(repoId: string, status: string): Promise<void> {
+    const db = this.getDatabase();
+    await db.query(`UPDATE repositories SET status = $1 WHERE id = $2`, [
+      status,
+      repoId,
+    ]);
   }
 
   async clearRepository(repoId: string): Promise<void> {

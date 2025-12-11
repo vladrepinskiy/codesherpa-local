@@ -5,6 +5,7 @@ export const createChatsTable = `
   CREATE TABLE IF NOT EXISTS chats (
     id TEXT PRIMARY KEY,
     title TEXT,
+    repo_id TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
@@ -53,16 +54,17 @@ export class ChatsRepository extends BaseRepository<Chat> {
     await db.query("DELETE FROM chats WHERE id = $1", [id]);
   }
 
-  async insertChat(id: string, title?: string): Promise<Chat> {
+  async insertChat(id: string, repoId: string, title?: string): Promise<Chat> {
     const db = this.getDatabase();
-    await db.query(`INSERT INTO chats (id, title) VALUES ($1, $2)`, [
-      id,
-      title || null,
-    ]);
+    await db.query(
+      `INSERT INTO chats (id, title, repo_id) VALUES ($1, $2, $3)`,
+      [id, title || null, repoId]
+    );
 
     return {
       id,
       title,
+      repo_id: repoId,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -88,6 +90,20 @@ export class ChatsRepository extends BaseRepository<Chat> {
     const db = this.getDatabase();
     const result = await db.query(
       "SELECT * FROM chats ORDER BY updated_at DESC"
+    );
+
+    return (result.rows as Chat[]).map((row) => ({
+      ...row,
+      created_at: new Date(row.created_at),
+      updated_at: new Date(row.updated_at),
+    }));
+  }
+
+  async getChatsByRepoId(repoId: string): Promise<Chat[]> {
+    const db = this.getDatabase();
+    const result = await db.query(
+      "SELECT * FROM chats WHERE repo_id = $1 ORDER BY updated_at DESC",
+      [repoId]
     );
 
     return (result.rows as Chat[]).map((row) => ({

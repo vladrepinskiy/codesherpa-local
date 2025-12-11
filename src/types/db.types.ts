@@ -1,3 +1,4 @@
+import { REPOSITORY_IMPORT_STATUS } from "../constants/import.constants";
 import type { ValueOf } from "./util.types";
 
 export type Comment = {
@@ -35,6 +36,8 @@ export type Issue = {
   closed_at?: Date;
 };
 
+export type RepositoryImportStatus = ValueOf<typeof REPOSITORY_IMPORT_STATUS>;
+
 export type Repository = {
   id: string;
   owner: string;
@@ -43,6 +46,7 @@ export type Repository = {
   url: string;
   description?: string;
   default_branch?: string;
+  status: RepositoryImportStatus;
   imported_at: Date;
 };
 
@@ -66,6 +70,7 @@ export type MessageStatus = ValueOf<typeof MESSAGE_STATUS>;
 export type Chat = {
   id: string;
   title?: string;
+  repo_id: string;
   created_at: Date;
   updated_at: Date;
 };

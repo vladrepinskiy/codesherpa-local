@@ -6,7 +6,13 @@ import { ImportForm } from "./ImportForm";
 import { ImportProgress } from "./ImportProgress";
 import { ImportStats } from "./ImportStats";
 
-export const RepositoryImporter = () => {
+type RepositoryImporterProps = {
+  onImportSuccess?: () => void;
+};
+
+export const RepositoryImporter = ({
+  onImportSuccess,
+}: RepositoryImporterProps) => {
   const [state, setState] = useState<ImportState>({ status: "idle" });
 
   const handleImport = async (repoUrl: string, token?: string) => {
@@ -20,6 +26,7 @@ export const RepositoryImporter = () => {
 
     if (result.success) {
       setState({ status: "success", result });
+      onImportSuccess?.();
     } else {
       setState({
         status: "error",

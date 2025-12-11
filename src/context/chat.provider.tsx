@@ -25,19 +25,24 @@ type ChatProviderProps = {
 };
 
 export const ChatProvider = ({ children }: ChatProviderProps) => {
-  const params = useParams<{ chatId?: string }>();
+  const params = useParams<{
+    chatId?: string;
+    repoShortId?: string;
+    chatShortId?: string;
+  }>();
   const [, setLocation] = useLocation();
 
   const [chatId, setChatId] = useState<string | null>(null);
+  const [repoId, setRepoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDbReady, setIsDbReady] = useState(false);
   const [input, setInput] = useState("");
 
-  const createNewChat = async (): Promise<string> => {
+  const createNewChat = async (repoId: string): Promise<string> => {
     const { chatsRepository } = getRepositories();
     const newChatId = generateId();
-    await chatsRepository.insertChat(newChatId);
+    await chatsRepository.insertChat(newChatId, repoId);
     return newChatId;
   };
 
@@ -48,11 +53,24 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     const { chatsRepository, messagesRepository } = getRepositories();
 
     let currentChatId = chatId;
+    let currentRepoId = repoId;
 
     if (!currentChatId) {
-      currentChatId = await createNewChat();
+      if (!currentRepoId) {
+        console.error("Cannot create chat without repoId");
+        setIsLoading(false);
+        return;
+      }
+      currentChatId = await createNewChat(currentRepoId);
       setChatId(currentChatId);
-      setLocation(`/chat/${toShortId(currentChatId)}`);
+
+      if (params.repoShortId) {
+        setLocation(
+          `/repo/${params.repoShortId}/chat/${toShortId(currentChatId)}`
+        );
+      } else {
+        setLocation(`/chat/${toShortId(currentChatId)}`);
+      }
     }
 
     const userMessageId = generateId();
@@ -232,8 +250,27 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   useEffect(() => {
     if (!isDbReady) return;
 
-    const loadChat = async () => {
-      const shortId = params.chatId;
+    const loadRepoAndChat = async () => {
+      const { repositoriesRepository, chatsRepository, messagesRepository } =
+        getRepositories();
+
+      if (params.repoShortId) {
+        const repo = await repositoriesRepository.readByShortId(
+          params.repoShortId
+        );
+        if (repo) {
+          setRepoId(repo.id);
+        } else {
+          setRepoId(null);
+          setChatId(null);
+          setMessages([]);
+          return;
+        }
+      } else {
+        setRepoId(null);
+      }
+
+      const shortId = params.chatShortId || params.chatId;
 
       if (!shortId) {
         setChatId(null);
@@ -241,7 +278,6 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         return;
       }
 
-      const { chatsRepository, messagesRepository } = getRepositories();
       const chat = await chatsRepository.readByShortId(shortId);
 
       if (chat) {
@@ -256,8 +292,8 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       }
     };
 
-    loadChat();
-  }, [params.chatId, isDbReady]);
+    loadRepoAndChat();
+  }, [params.repoShortId, params.chatShortId, params.chatId, isDbReady]);
 
   return (
     <ChatContext.Provider
