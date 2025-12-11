@@ -1,59 +1,44 @@
-import { useEffect, useState } from "react";
 import { styled } from "goober";
+import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { Page } from "../core/Page";
-import { RepoInfo } from "../repo/RepoInfo";
-import { RepoStats } from "../repo/RepoStats";
-import { RepoChats } from "../repo/RepoChats";
+import { useChats } from "../../hooks/useChats";
+import { useRepo } from "../../hooks/useRepo";
+import type { Chat, ImportStats } from "../../types/db.types";
 import { getRepositories } from "../../util/db.util";
 import { toShortId } from "../../util/id.util";
-import type { Repository, Chat, ImportStats } from "../../types/db.types";
+import { Page } from "../core/Page";
+import { RepoChats } from "../repo/RepoChats";
+import { RepoInfo } from "../repo/RepoInfo";
+import { RepoStats } from "../repo/RepoStats";
 
 export const PageRepo = () => {
   const params = useParams<{ repoShortId: string }>();
   const [_location, setLocation] = useLocation();
-  const [repository, setRepository] = useState<Repository | null>(null);
-  const [chats, setChats] = useState<Chat[]>([]);
+  const { getRepositoryByShortId } = useRepo();
+  const { getChatsByRepoId } = useChats();
+
   const [stats, setStats] = useState<ImportStats | null>(null);
-  const [loading, setLoading] = useState(true);
 
+  const repository = params.repoShortId
+    ? getRepositoryByShortId(params.repoShortId)
+    : undefined;
+
+  const chats = repository ? getChatsByRepoId(repository.id) : [];
+
+  // todo: put stats on the repo object and load directly
   useEffect(() => {
-    const loadRepoData = async () => {
-      try {
-        const { repositoriesRepository, chatsRepository } = getRepositories();
+    const loadStats = async () => {
+      if (!repository) return;
 
-        if (!params.repoShortId) {
-          setLoading(false);
-          return;
-        }
-
-        const repo = await repositoriesRepository.readByShortId(
-          params.repoShortId
-        );
-
-        if (!repo) {
-          setLoading(false);
-          return;
-        }
-
-        setRepository(repo);
-
-        const [repoChats, repoStats] = await Promise.all([
-          chatsRepository.getChatsByRepoId(repo.id),
-          repositoriesRepository.getImportStats(repo.id),
-        ]);
-
-        setChats(repoChats);
-        setStats(repoStats);
-      } catch (error) {
-        console.error("Failed to load repository data:", error);
-      } finally {
-        setLoading(false);
-      }
+      const { repositoriesRepository } = getRepositories();
+      const repoStats = await repositoriesRepository.getImportStats(
+        repository.id
+      );
+      setStats(repoStats);
     };
 
-    loadRepoData();
-  }, [params.repoShortId]);
+    loadStats();
+  }, [repository?.id]);
 
   const handleNewChat = () => {
     if (repository) {
@@ -66,14 +51,6 @@ export const PageRepo = () => {
       setLocation(`/repo/${params.repoShortId}/chat/${toShortId(chat.id)}`);
     }
   };
-
-  if (loading) {
-    return (
-      <Page>
-        <LoadingText>Loading repository...</LoadingText>
-      </Page>
-    );
-  }
 
   if (!repository) {
     return (
@@ -114,11 +91,6 @@ const Title = styled("h1")`
   font-weight: 600;
   margin: 0 0 2rem 0;
   color: ${(props) => props.theme.palette.text};
-`;
-
-const LoadingText = styled("div")`
-  font-size: 1.125rem;
-  color: ${(props) => props.theme.palette.textMuted};
 `;
 
 const ErrorText = styled("div")`

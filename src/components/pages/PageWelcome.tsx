@@ -15,7 +15,7 @@ export const PageWelcome = () => {
       <WelcomeContainer>
         <Title>Welcome to CodeSherpa Local</Title>
         <Description>
-          CodeSherpa Local is a client-side GitHub repository importer that
+          CodeSherpa Local is a client-side GitHub repository explorer that
           fetches repository data (files, issues, PRs, comments) via GitHub API
           and stores it in a PGLite database persisted to IndexedDB.
         </Description>

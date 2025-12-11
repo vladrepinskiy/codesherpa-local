@@ -18,25 +18,8 @@ export const createFilesTable = `
   CREATE INDEX IF NOT EXISTS idx_files_path ON files(path);
 `;
 
-export class FilesRepository extends BaseRepository<File> {
+export class FilesRepository extends BaseRepository {
   protected readonly tableName = "files";
-
-  async readById(id: string): Promise<File | null> {
-    const db = this.getDatabase();
-    const result = await db.query("SELECT * FROM files WHERE id = $1", [id]);
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as File;
-    return {
-      ...row,
-      last_modified: row.last_modified
-        ? new Date(row.last_modified)
-        : undefined,
-    };
-  }
 
   async deleteById(id: string): Promise<void> {
     const db = this.getDatabase();

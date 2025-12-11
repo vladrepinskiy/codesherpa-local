@@ -1,14 +1,11 @@
-import { createContext, useEffect, useState, type ReactNode } from "react";
 import type { PGlite } from "@electric-sql/pglite";
-import { initDatabase, getDatabase } from "../util/db.util";
-import { importDemoRepository } from "../util/demo.util";
+import { PGliteProvider } from "@electric-sql/pglite-react";
+import type { PGliteWithLive } from "@electric-sql/pglite/live";
+import { useEffect, useState, type ReactNode } from "react";
 import { LoadingOverlay } from "../components/core/LoadingOverlay";
-
-type DatabaseContextType = {
-  db: PGlite;
-};
-
-export const DatabaseContext = createContext<DatabaseContextType | null>(null);
+import { getDatabase } from "../util/db.instance";
+import { initDatabase } from "../util/db.util";
+import { importDemoRepository } from "../util/demo.util";
 
 export const DatabaseProvider = ({ children }: { children: ReactNode }) => {
   const [db, setDb] = useState<PGlite | null>(null);
@@ -34,9 +31,10 @@ export const DatabaseProvider = ({ children }: { children: ReactNode }) => {
     return <LoadingOverlay message="Initializing database..." />;
   }
 
+  // db is created with the live extension, so it has the live namespace at runtime
   return (
-    <DatabaseContext.Provider value={{ db }}>
+    <PGliteProvider db={db as unknown as PGliteWithLive}>
       {children}
-    </DatabaseContext.Provider>
+    </PGliteProvider>
   );
 };

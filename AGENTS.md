@@ -70,6 +70,12 @@ src/
 - Configured to filter props starting with `$` (transient props)
 - Setup in `main.tsx`: `setup(React.createElement, undefined, undefined, (props) => { ... })`
 
+**React Compiler**
+
+- Project uses React Compiler (`babel-plugin-react-compiler`)
+- **Do not use `useCallback` or `useMemo`** - the compiler handles memoization automatically
+- Write plain functions and expressions; the compiler optimizes them
+
 **Example Component Structure:**
 
 ```tsx

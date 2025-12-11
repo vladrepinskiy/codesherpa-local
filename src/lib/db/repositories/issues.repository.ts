@@ -23,43 +23,8 @@ export const createIssuesTable = `
   CREATE INDEX IF NOT EXISTS idx_issues_state ON issues(state);
 `;
 
-export class IssuesRepository extends BaseRepository<Issue> {
+export class IssuesRepository extends BaseRepository {
   protected readonly tableName = "issues";
-
-  async readById(id: string): Promise<Issue | null> {
-    const db = this.getDatabase();
-    const result = await db.query("SELECT * FROM issues WHERE id = $1", [id]);
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as Issue & { labels: string | any[] | null };
-
-    let labels: any[] | undefined = undefined;
-    if (row.labels) {
-      if (typeof row.labels === "string") {
-        try {
-          const parsed = JSON.parse(row.labels);
-          labels =
-            Array.isArray(parsed) && parsed.length > 0 ? parsed : undefined;
-        } catch (e) {
-          // Invalid JSON, treat as undefined
-          labels = undefined;
-        }
-      } else if (Array.isArray(row.labels)) {
-        labels = row.labels.length > 0 ? row.labels : undefined;
-      }
-    }
-
-    return {
-      ...row,
-      labels,
-      created_at: new Date(row.created_at),
-      updated_at: row.updated_at ? new Date(row.updated_at) : undefined,
-      closed_at: row.closed_at ? new Date(row.closed_at) : undefined,
-    };
-  }
 
   async deleteById(id: string): Promise<void> {
     const db = this.getDatabase();

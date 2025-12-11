@@ -5,6 +5,8 @@ import type {
   ImportStats,
 } from "../../../types/db.types";
 
+export const REPOSITORIES_QUERY = `SELECT * FROM repositories ORDER BY imported_at DESC`;
+
 export const createReposTable = `
   CREATE TABLE IF NOT EXISTS repositories (
     id TEXT PRIMARY KEY,
@@ -19,43 +21,8 @@ export const createReposTable = `
   );
 `;
 
-export class RepositoriesRepository extends BaseRepository<Repository> {
+export class RepositoriesRepository extends BaseRepository {
   protected readonly tableName = "repositories";
-
-  async readById(id: string): Promise<Repository | null> {
-    const db = this.getDatabase();
-    const result = await db.query("SELECT * FROM repositories WHERE id = $1", [
-      id,
-    ]);
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as Repository;
-    return {
-      ...row,
-      imported_at: new Date(row.imported_at),
-    };
-  }
-
-  async readByShortId(shortId: string): Promise<Repository | null> {
-    const db = this.getDatabase();
-    const result = await db.query(
-      "SELECT * FROM repositories WHERE id LIKE $1 ORDER BY imported_at DESC LIMIT 1",
-      [`${shortId}%`]
-    );
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as Repository;
-    return {
-      ...row,
-      imported_at: new Date(row.imported_at),
-    };
-  }
 
   async deleteById(id: string): Promise<void> {
     const db = this.getDatabase();
@@ -95,11 +62,6 @@ export class RepositoriesRepository extends BaseRepository<Repository> {
       status,
       repoId,
     ]);
-  }
-
-  async clearRepository(repoId: string): Promise<void> {
-    const db = this.getDatabase();
-    await db.query("DELETE FROM repositories WHERE id = $1", [repoId]);
   }
 
   async getAllRepositories(): Promise<Repository[]> {

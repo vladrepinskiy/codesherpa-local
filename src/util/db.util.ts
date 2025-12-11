@@ -1,4 +1,5 @@
-import { PGlite } from "@electric-sql/pglite";
+import type { PGlite } from "@electric-sql/pglite";
+import { initDatabase as initDbInstance } from "./db.instance";
 import {
   ChatsRepository,
   createChatsTable,
@@ -24,7 +25,7 @@ import {
   RepositoriesRepository,
 } from "../lib/db/repositories/repo.repository";
 
-let db: PGlite | null = null;
+let schemaInitialized = false;
 
 let chatsRepositoryInstance: ChatsRepository | null = null;
 let commentsRepositoryInstance: CommentsRepository | null = null;
@@ -34,23 +35,13 @@ let messagesRepositoryInstance: MessagesRepository | null = null;
 let repositoriesRepositoryInstance: RepositoriesRepository | null = null;
 
 export async function initDatabase(): Promise<PGlite> {
-  if (db) {
-    return db;
+  const db = await initDbInstance();
+
+  if (!schemaInitialized) {
+    await createSchema(db);
+    schemaInitialized = true;
   }
 
-  db = new PGlite("idb://codesherpa-db");
-
-  await db.waitReady;
-
-  await createSchema(db);
-
-  return db;
-}
-
-export function getDatabase(): PGlite {
-  if (!db) {
-    throw new Error("Database not initialized. Call initDatabase() first.");
-  }
   return db;
 }
 

@@ -15,24 +15,8 @@ export const createMessagesTable = `
   CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);
 `;
 
-export class MessagesRepository extends BaseRepository<Message> {
+export class MessagesRepository extends BaseRepository {
   protected readonly tableName = "messages";
-
-  async readById(id: string): Promise<Message | null> {
-    const db = this.getDatabase();
-    const result = await db.query("SELECT * FROM messages WHERE id = $1", [id]);
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as Message;
-    return {
-      ...row,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
-    };
-  }
 
   async deleteById(id: string): Promise<void> {
     const db = this.getDatabase();
@@ -91,26 +75,5 @@ export class MessagesRepository extends BaseRepository<Message> {
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
     }));
-  }
-
-  async getLastInterruptedMessage(chatId: string): Promise<Message | null> {
-    const db = this.getDatabase();
-    const result = await db.query(
-      `SELECT * FROM messages 
-       WHERE chat_id = $1 AND status = 'interrupted' 
-       ORDER BY created_at DESC LIMIT 1`,
-      [chatId]
-    );
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as Message;
-    return {
-      ...row,
-      created_at: new Date(row.created_at),
-      updated_at: new Date(row.updated_at),
-    };
   }
 }
