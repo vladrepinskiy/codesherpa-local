@@ -1,10 +1,10 @@
 import { styled } from "goober";
 
-type ImportCardProps = {
+type DashboardImportCardProps = {
   onClick: () => void;
 };
 
-export const ImportCard = ({ onClick }: ImportCardProps) => {
+export const DashboardImportCard = ({ onClick }: DashboardImportCardProps) => {
   return (
     <Card onClick={onClick}>
       <ImportIcon>+</ImportIcon>

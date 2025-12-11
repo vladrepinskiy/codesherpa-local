@@ -5,7 +5,7 @@ import { Page } from "../core/Page";
 import { ImportModal } from "../import/ImportModal";
 import { DashboardCard } from "../dashboard/DashboardCard";
 import { DashboardGrid } from "../dashboard/DashboardGrid";
-import { ImportCard } from "../dashboard/ImportCard";
+import { DashboardImportCard } from "../dashboard/DashboardImportCard";
 import { getRepositories } from "../../util/db.util";
 import { toShortId } from "../../util/id.util";
 import type { Repository } from "../../types/db.types";
@@ -74,7 +74,7 @@ export const PageDashboard = () => {
               onClick={() => handleRepoClick(repo)}
             />
           ))}
-          <ImportCard onClick={handleImportClick} />
+          <DashboardImportCard onClick={handleImportClick} />
         </DashboardGrid>
       </DashboardContainer>
       <ImportModal
