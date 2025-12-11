@@ -5,7 +5,7 @@ import { useHashLocation } from "wouter/use-hash-location";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
 import { ThemeToggle } from "./components/core/ThemeToggle";
-import { ChatPage } from "./components/pages/ChatPage";
+import { PageChat } from "./components/pages/PageChat";
 import { PageDashboard } from "./components/pages/PageDashboard";
 import { PageRepo } from "./components/pages/PageRepo";
 import { PageWelcome } from "./components/pages/PageWelcome";
@@ -31,12 +31,12 @@ export const App = () => {
                   <Route path="/welcome" component={PageWelcome} />
                   <Route
                     path="/repo/:repoShortId/chat/:chatShortId"
-                    component={ChatPage}
+                    component={PageChat}
                   />
-                  <Route path="/repo/:repoShortId/chat" component={ChatPage} />
+                  <Route path="/repo/:repoShortId/chat" component={PageChat} />
                   <Route path="/repo/:repoShortId" component={PageRepo} />
-                  <Route path="/chat/:chatId" component={ChatPage} />
-                  <Route path="/chat" component={ChatPage} />
+                  <Route path="/chat/:chatId" component={PageChat} />
+                  <Route path="/chat" component={PageChat} />
                 </Switch>
               </AppContainer>
             </Router>
