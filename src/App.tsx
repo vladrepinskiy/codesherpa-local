@@ -1,10 +1,10 @@
 import { styled } from "goober";
 import { Toaster } from "sonner";
-import { Route, Router, Switch } from "wouter";
+import { Route, Router, Switch, useLocation } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
-import { ThemeToggle } from "./components/core/ThemeToggle";
+import { Topbar } from "./components/core/Topbar";
 import { PageChat } from "./components/pages/PageChat";
 import { PageDashboard } from "./components/pages/PageDashboard";
 import { PageRepo } from "./components/pages/PageRepo";
@@ -22,28 +22,36 @@ export const App = () => {
           <OnboardingProvider>
             <Router hook={useHashLocation}>
               <HashRouteNormalizer />
-              <AppContainer>
-                <Toaster />
-                <ThemeToggle />
-                <DatabaseRepl />
-                <Switch>
-                  <Route path="/" component={PageDashboard} />
-                  <Route path="/welcome" component={PageWelcome} />
-                  <Route
-                    path="/repo/:repoShortId/chat/:chatShortId"
-                    component={PageChat}
-                  />
-                  <Route path="/repo/:repoShortId/chat" component={PageChat} />
-                  <Route path="/repo/:repoShortId" component={PageRepo} />
-                  <Route path="/chat/:chatId" component={PageChat} />
-                  <Route path="/chat" component={PageChat} />
-                </Switch>
-              </AppContainer>
+              <Routes />
             </Router>
           </OnboardingProvider>
         </LLMProvider>
       </DatabaseProvider>
     </ThemeProvider>
+  );
+};
+
+const Routes = () => {
+  const [location] = useLocation();
+
+  return (
+    <AppContainer>
+      <Toaster />
+      {location !== "/welcome" && <Topbar />}
+      <DatabaseRepl />
+      <Switch>
+        <Route path="/" component={PageDashboard} />
+        <Route path="/welcome" component={PageWelcome} />
+        <Route
+          path="/repo/:repoShortId/chat/:chatShortId"
+          component={PageChat}
+        />
+        <Route path="/repo/:repoShortId/chat" component={PageChat} />
+        <Route path="/repo/:repoShortId" component={PageRepo} />
+        <Route path="/chat/:chatId" component={PageChat} />
+        <Route path="/chat" component={PageChat} />
+      </Switch>
+    </AppContainer>
   );
 };
 

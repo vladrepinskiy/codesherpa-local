@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { styled } from "goober";
 import { useLocation, useParams } from "wouter";
 import { Page } from "../core/Page";
-import { Button } from "../core/Button";
 import { RepoInfo } from "../repo/RepoInfo";
 import { RepoStats } from "../repo/RepoStats";
 import { RepoChats } from "../repo/RepoChats";
@@ -87,10 +86,7 @@ export const PageRepo = () => {
   return (
     <Page>
       <RepoContainer>
-        <Header>
-          <BackButton onClick={() => setLocation("/")}>← Back</BackButton>
-          <Title>{repository.full_name}</Title>
-        </Header>
+        <Title>Repo Details</Title>
 
         <RepoInfo repository={repository} />
 
@@ -113,22 +109,10 @@ const RepoContainer = styled("div")`
   overflow-y: auto;
 `;
 
-const Header = styled("div")`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-`;
-
-const BackButton = styled(Button)`
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-`;
-
 const Title = styled("h1")`
   font-size: 2rem;
   font-weight: 600;
-  margin: 0;
+  margin: 0 0 2rem 0;
   color: ${(props) => props.theme.palette.text};
 `;
 

@@ -41,7 +41,7 @@ export const Chat = () => {
 const ChatContainer = styled("div")`
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 4rem);
+  height: calc(100vh - 3rem);
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
