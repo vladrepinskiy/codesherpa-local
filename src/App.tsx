@@ -7,7 +7,7 @@ import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
 import { ThemeToggle } from "./components/core/ThemeToggle";
 import { ChatPage } from "./components/pages/ChatPage";
 import { PageDashboard } from "./components/pages/PageDashboard";
-import { RepoPage } from "./components/pages/RepoPage";
+import { PageRepo } from "./components/pages/PageRepo";
 import { PageWelcome } from "./components/pages/PageWelcome";
 import { DatabaseProvider } from "./context/db.provider";
 import { LLMProvider } from "./context/llm.provider";
@@ -34,7 +34,7 @@ export const App = () => {
                     component={ChatPage}
                   />
                   <Route path="/repo/:repoShortId/chat" component={ChatPage} />
-                  <Route path="/repo/:repoShortId" component={RepoPage} />
+                  <Route path="/repo/:repoShortId" component={PageRepo} />
                   <Route path="/chat/:chatId" component={ChatPage} />
                   <Route path="/chat" component={ChatPage} />
                 </Switch>
