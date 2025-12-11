@@ -20,7 +20,7 @@ import {
 } from "../constants/import.constants";
 import { GitHubAPIError } from "../error/githubapi.error";
 import type { ImportResult, ProgressCallback } from "../types/import.types";
-import { getRepositories, initDatabase } from "../util/db.util";
+import { getDatabase, getRepositories } from "../util/db.util";
 import { GitHubAPI } from "./github.service";
 
 export class RepositoryImporter {
@@ -289,7 +289,7 @@ export class RepositoryImporter {
   async importRepository(repoUrl: string): Promise<ImportResult> {
     let repoId: string | undefined;
     try {
-      await initDatabase();
+      getDatabase();
       this.reportProgress(
         "init",
         0,

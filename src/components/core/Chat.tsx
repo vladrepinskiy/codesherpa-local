@@ -7,10 +7,9 @@ import { ChatMessageList } from "../chat/ChatMessageList";
 
 export const Chat = () => {
   const { isInitialized } = useLLM();
-  const { messages, input, setInput, isLoading, isDbReady, sendMessage } =
-    useChat();
+  const { messages, input, setInput, isLoading, sendMessage } = useChat();
 
-  if (!isInitialized || !isDbReady) {
+  if (!isInitialized) {
     return <ChatLoadingSpinner />;
   }
 
@@ -21,9 +20,7 @@ export const Chat = () => {
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
-    if (!isInitialized || !isDbReady || !input.trim() || isLoading) {
-      return;
-    }
+    if (!isInitialized || !input.trim() || isLoading) return;
 
     await sendMessage(input);
   };

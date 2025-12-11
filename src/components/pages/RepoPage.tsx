@@ -3,7 +3,7 @@ import { styled } from "goober";
 import { useLocation, useParams } from "wouter";
 import { Page } from "../core/Page";
 import { Button } from "../core/Button";
-import { initDatabase, getRepositories } from "../../util/db.util";
+import { getRepositories } from "../../util/db.util";
 import { toShortId } from "../../util/id.util";
 import type { Repository, Chat, ImportStats } from "../../types/db.types";
 
@@ -18,7 +18,6 @@ export const RepoPage = () => {
   useEffect(() => {
     const loadRepoData = async () => {
       try {
-        await initDatabase();
         const { repositoriesRepository, chatsRepository } = getRepositories();
 
         if (!params.repoShortId) {

@@ -1,16 +1,14 @@
 import { Repl } from "@electric-sql/pglite-repl";
 import { styled } from "goober";
 import { useEffect, useState } from "react";
-import { getDatabase, initDatabase } from "../../util/db.util";
+import { useDB } from "../../hooks/useDB";
 
 export const DatabaseRepl = () => {
+  const { db } = useDB();
   const [isOpen, setIsOpen] = useState(false);
-  const [db, setDb] = useState<Awaited<ReturnType<typeof initDatabase>> | null>(
-    null
-  );
 
   useEffect(() => {
-    const handleKeyDown = async (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd+Shift+D on Mac, Ctrl+Shift+D on Windows/Linux
       if (
         (e.metaKey || e.ctrlKey) &&
@@ -19,25 +17,7 @@ export const DatabaseRepl = () => {
         !e.defaultPrevented
       ) {
         e.preventDefault();
-        const willOpen = !isOpen;
-        setIsOpen(willOpen);
-
-        if (willOpen) {
-          // Try to get or initialize database when opening
-          try {
-            const database = getDatabase();
-            setDb(database);
-          } catch {
-            // Database not initialized, initialize it
-            try {
-              const database = await initDatabase();
-              setDb(database);
-            } catch (error) {
-              console.error("Failed to initialize database for REPL:", error);
-              setIsOpen(false);
-            }
-          }
-        }
+        setIsOpen((prev) => !prev);
       }
     };
 
@@ -46,9 +26,9 @@ export const DatabaseRepl = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, []);
 
-  if (!isOpen || !db) {
+  if (!isOpen) {
     return null;
   }
 

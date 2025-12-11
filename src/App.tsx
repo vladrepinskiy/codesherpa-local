@@ -6,9 +6,10 @@ import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
 import { ThemeToggle } from "./components/core/ThemeToggle";
 import { ChatPage } from "./components/pages/ChatPage";
-import { Dashboard } from "./components/pages/Dashboard";
+import { PageDashboard } from "./components/pages/Dashboard";
 import { RepoPage } from "./components/pages/RepoPage";
 import { PageWelcome } from "./components/pages/PageWelcome";
+import { DatabaseProvider } from "./context/db.provider";
 import { LLMProvider } from "./context/llm.provider";
 import { OnboardingProvider } from "./context/onboarding.provider";
 import { ThemeProvider } from "./context/theme.provider";
@@ -16,30 +17,32 @@ import { ThemeProvider } from "./context/theme.provider";
 export const App = () => {
   return (
     <ThemeProvider>
-      <LLMProvider>
-        <OnboardingProvider>
-          <Router hook={useHashLocation}>
-            <HashRouteNormalizer />
-            <AppContainer>
-              <Toaster />
-              <ThemeToggle />
-              <Switch>
-                <Route path="/" component={Dashboard} />
-                <Route path="/welcome" component={PageWelcome} />
-                <Route
-                  path="/repo/:repoShortId/chat/:chatShortId"
-                  component={ChatPage}
-                />
-                <Route path="/repo/:repoShortId/chat" component={ChatPage} />
-                <Route path="/repo/:repoShortId" component={RepoPage} />
-                <Route path="/chat/:chatId" component={ChatPage} />
-                <Route path="/chat" component={ChatPage} />
-              </Switch>
-              <DatabaseRepl />
-            </AppContainer>
-          </Router>
-        </OnboardingProvider>
-      </LLMProvider>
+      <DatabaseProvider>
+        <LLMProvider>
+          <OnboardingProvider>
+            <Router hook={useHashLocation}>
+              <HashRouteNormalizer />
+              <AppContainer>
+                <Toaster />
+                <ThemeToggle />
+                <Switch>
+                  <Route path="/" component={PageDashboard} />
+                  <Route path="/welcome" component={PageWelcome} />
+                  <Route
+                    path="/repo/:repoShortId/chat/:chatShortId"
+                    component={ChatPage}
+                  />
+                  <Route path="/repo/:repoShortId/chat" component={ChatPage} />
+                  <Route path="/repo/:repoShortId" component={RepoPage} />
+                  <Route path="/chat/:chatId" component={ChatPage} />
+                  <Route path="/chat" component={ChatPage} />
+                </Switch>
+                <DatabaseRepl />
+              </AppContainer>
+            </Router>
+          </OnboardingProvider>
+        </LLMProvider>
+      </DatabaseProvider>
     </ThemeProvider>
   );
 };

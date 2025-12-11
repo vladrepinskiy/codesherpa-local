@@ -1,7 +1,7 @@
 import { DEMO_REPO_ID_PREFIX } from "../constants/import.constants";
 import type { Comment, File, Issue } from "../types/db.types";
 import type { DemoRepoData } from "../types/demo.types";
-import { getRepositories, initDatabase } from "./db.util";
+import { getDatabase, getRepositories } from "./db.util";
 
 async function loadDemoRepoData(): Promise<DemoRepoData> {
   try {
@@ -19,7 +19,7 @@ async function loadDemoRepoData(): Promise<DemoRepoData> {
 
 export async function importDemoRepository(): Promise<void> {
   try {
-    await initDatabase();
+    getDatabase();
     const { repositoriesRepository } = getRepositories();
 
     const allRepos = await repositoriesRepository.getAllRepositories();

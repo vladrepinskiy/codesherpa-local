@@ -3,19 +3,18 @@ import { styled } from "goober";
 import { useLocation } from "wouter";
 import { Page } from "../core/Page";
 import { ImportModal } from "../import/ImportModal";
-import { initDatabase } from "../../util/db.util";
 import { getRepositories } from "../../util/db.util";
-import { importDemoRepository } from "../../util/demo.util";
 import { toShortId } from "../../util/id.util";
 import { REPOSITORY_IMPORT_STATUS } from "../../constants/import.constants";
 import type { Repository } from "../../types/db.types";
 
-export const Dashboard = () => {
-  const [, setLocation] = useLocation();
+export const PageDashboard = () => {
+  const [_location, setLocation] = useLocation();
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  // todo: new data flow with live queries from providers to components
   const loadRepositories = async () => {
     const { repositoriesRepository } = getRepositories();
     const repos = await repositoriesRepository.getAllRepositories();
@@ -42,8 +41,6 @@ export const Dashboard = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        await initDatabase();
-        await importDemoRepository();
         await loadRepositories();
       } catch (error) {
         console.error("Failed to load repositories:", error);

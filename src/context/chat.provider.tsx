@@ -2,14 +2,13 @@ import { createContext, useEffect, useState, type ReactNode } from "react";
 import { useLocation, useParams } from "wouter";
 import { generateChatResponse } from "../services/llm.service";
 import type { Message } from "../types/db.types";
-import { initDatabase, getRepositories } from "../util/db.util";
+import { getRepositories } from "../util/db.util";
 import { generateId, toShortId } from "../util/id.util";
 
 type ChatContextType = {
   chatId: string | null;
   messages: Message[];
   isLoading: boolean;
-  isDbReady: boolean;
   input: string;
   setInput: (value: string) => void;
   sendMessage: (content: string) => Promise<void>;
@@ -36,7 +35,6 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [repoId, setRepoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDbReady, setIsDbReady] = useState(false);
   const [input, setInput] = useState("");
 
   const createNewChat = async (repoId: string): Promise<string> => {
@@ -47,7 +45,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   };
 
   const sendMessage = async (content: string) => {
-    if (!content.trim() || isLoading || !isDbReady) return;
+    if (!content.trim() || isLoading) return;
 
     setIsLoading(true);
     const { chatsRepository, messagesRepository } = getRepositories();
@@ -167,7 +165,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   };
 
   const retryMessage = async (messageId: string) => {
-    if (isLoading || !isDbReady || !chatId) return;
+    if (isLoading || !chatId) return;
 
     const { messagesRepository, chatsRepository } = getRepositories();
 
@@ -240,16 +238,6 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   };
 
   useEffect(() => {
-    const init = async () => {
-      await initDatabase();
-      setIsDbReady(true);
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (!isDbReady) return;
-
     const loadRepoAndChat = async () => {
       const { repositoriesRepository, chatsRepository, messagesRepository } =
         getRepositories();
@@ -293,7 +281,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     };
 
     loadRepoAndChat();
-  }, [params.repoShortId, params.chatShortId, params.chatId, isDbReady]);
+  }, [params.repoShortId, params.chatShortId, params.chatId]);
 
   return (
     <ChatContext.Provider
@@ -301,7 +289,6 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         chatId,
         messages,
         isLoading,
-        isDbReady,
         input,
         setInput,
         sendMessage,
