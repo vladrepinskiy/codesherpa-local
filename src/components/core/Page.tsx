@@ -1,15 +1,19 @@
 import { styled } from "goober";
 import type { ReactNode } from "react";
+import { useLocation } from "wouter";
 
 type PageProps = {
   children: ReactNode;
 };
 
 export const Page = ({ children }: PageProps) => {
-  return <PageContainer>{children}</PageContainer>;
+  const [location] = useLocation();
+  const showTopbar = location !== "/welcome";
+
+  return <PageContainer $showTopbar={showTopbar}>{children}</PageContainer>;
 };
 
-const PageContainer = styled("div")`
+const PageContainer = styled("div")<{ $showTopbar: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,4 +22,5 @@ const PageContainer = styled("div")`
   margin: 0 auto;
   overflow: hidden;
   background-color: ${(props) => props.theme.palette.bg};
+  padding-top: ${(props) => (props.$showTopbar ? "3rem" : "0")};
 `;

@@ -14,12 +14,13 @@ import {
   ISSUE_BATCH_SIZE,
   ISSUE_ID_PREFIX,
   REPO_ID_PREFIX,
+  REPOSITORY_IMPORT_STATUS,
   TEXT_FILE_EXTENSIONS,
   TOTAL_IMPORT_STEPS,
 } from "../constants/import.constants";
 import { GitHubAPIError } from "../error/githubapi.error";
 import type { ImportResult, ProgressCallback } from "../types/import.types";
-import { getRepositories, initDatabase } from "../util/db.util";
+import { getDatabase, getRepositories } from "../util/db.util";
 import { GitHubAPI } from "./github.service";
 
 export class RepositoryImporter {
@@ -72,6 +73,7 @@ export class RepositoryImporter {
       url: repoData.html_url,
       description: repoData.description || undefined,
       default_branch: repoData.default_branch,
+      status: REPOSITORY_IMPORT_STATUS.IMPORTING,
     });
 
     return { repoId };
@@ -245,7 +247,7 @@ export class RepositoryImporter {
     return await repositoriesRepository.getImportStats(repoId);
   }
 
-  private handleImportError(error: unknown): ImportResult {
+  private handleImportError(error: unknown, repoId?: string): ImportResult {
     console.error("Import error:", error);
 
     let errorMessage = ERROR_MESSAGE_UNKNOWN;
@@ -264,9 +266,16 @@ export class RepositoryImporter {
       errorMessage = error.message;
     }
 
+    if (repoId) {
+      const { repositoriesRepository } = getRepositories();
+      repositoriesRepository
+        .updateStatus(repoId, REPOSITORY_IMPORT_STATUS.ERROR)
+        .catch((err) => console.error("Failed to update repo status:", err));
+    }
+
     return {
       success: false,
-      repoId: "",
+      repoId: repoId || "",
       stats: {
         filesCount: 0,
         issuesCount: 0,
@@ -278,8 +287,9 @@ export class RepositoryImporter {
   }
 
   async importRepository(repoUrl: string): Promise<ImportResult> {
+    let repoId: string | undefined;
     try {
-      await initDatabase();
+      getDatabase();
       this.reportProgress(
         "init",
         0,
@@ -293,11 +303,19 @@ export class RepositoryImporter {
       }
 
       const { owner, repo } = parsed;
-      const { repoId } = await this.importMetadata(owner, repo);
+      const result = await this.importMetadata(owner, repo);
+      repoId = result.repoId;
       await this.importFiles(owner, repo, repoId);
       const issueRecords = await this.importIssues(owner, repo, repoId);
       await this.importComments(owner, repo, repoId, issueRecords);
       const stats = await this.getStatistics(repoId);
+
+      const { repositoriesRepository } = getRepositories();
+
+      await repositoriesRepository.updateStatus(
+        repoId,
+        REPOSITORY_IMPORT_STATUS.COMPLETE
+      );
 
       return {
         success: true,
@@ -305,7 +323,7 @@ export class RepositoryImporter {
         stats,
       };
     } catch (error) {
-      return this.handleImportError(error);
+      return this.handleImportError(error, repoId);
     }
   }
 }

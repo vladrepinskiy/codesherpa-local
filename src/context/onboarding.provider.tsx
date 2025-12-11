@@ -20,6 +20,11 @@ export const OnboardingProvider = ({ children }: OnboardingProviderProps) => {
   );
   const [location, setLocation] = useLocation();
 
+  const setOnboardingStatus = (status: string) => {
+    localStorage.setItem("onboarding", status);
+    setOnboardingStatusState(status);
+  };
+
   useEffect(() => {
     const stored = localStorage.getItem("onboarding");
     setOnboardingStatusState(stored);
@@ -38,11 +43,6 @@ export const OnboardingProvider = ({ children }: OnboardingProviderProps) => {
       }
     }
   }, [location]);
-
-  const setOnboardingStatus = (status: string) => {
-    localStorage.setItem("onboarding", status);
-    setOnboardingStatusState(status);
-  };
 
   return (
     <OnboardingContext.Provider

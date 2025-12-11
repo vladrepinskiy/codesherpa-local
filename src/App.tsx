@@ -1,13 +1,15 @@
 import { styled } from "goober";
 import { Toaster } from "sonner";
-import { Route, Router, Switch } from "wouter";
+import { Route, Router, Switch, useLocation } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
-import "./App.css";
 import { DatabaseRepl } from "./components/core/DatabaseRepl";
-import { ThemeToggle } from "./components/core/ThemeToggle";
-import { ChatPage } from "./components/pages/ChatPage";
-import { Import } from "./components/pages/Import";
-import { Welcome } from "./components/pages/Welcome";
+import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
+import { Topbar } from "./components/core/Topbar";
+import { PageChat } from "./components/pages/PageChat";
+import { PageDashboard } from "./components/pages/PageDashboard";
+import { PageRepo } from "./components/pages/PageRepo";
+import { PageWelcome } from "./components/pages/PageWelcome";
+import { DatabaseProvider } from "./context/db.provider";
 import { LLMProvider } from "./context/llm.provider";
 import { OnboardingProvider } from "./context/onboarding.provider";
 import { ThemeProvider } from "./context/theme.provider";
@@ -15,25 +17,41 @@ import { ThemeProvider } from "./context/theme.provider";
 export const App = () => {
   return (
     <ThemeProvider>
-      <LLMProvider>
-        <OnboardingProvider>
-          <Router hook={useHashLocation}>
-            <AppContainer>
-              <Toaster />
-              <ThemeToggle />
-              <Switch>
-                <Route path="/welcome" component={Welcome} />
-                <Route path="/import" component={Import} />
-                <Route path="/chat/:chatId" component={ChatPage} />
-                <Route path="/chat" component={ChatPage} />
-                <Route component={Welcome} />
-              </Switch>
-              <DatabaseRepl />
-            </AppContainer>
-          </Router>
-        </OnboardingProvider>
-      </LLMProvider>
+      <DatabaseProvider>
+        <LLMProvider>
+          <OnboardingProvider>
+            <Router hook={useHashLocation}>
+              <HashRouteNormalizer />
+              <Routes />
+            </Router>
+          </OnboardingProvider>
+        </LLMProvider>
+      </DatabaseProvider>
     </ThemeProvider>
+  );
+};
+
+const Routes = () => {
+  const [location] = useLocation();
+
+  return (
+    <AppContainer>
+      <Toaster />
+      {location !== "/welcome" && <Topbar />}
+      <DatabaseRepl />
+      <Switch>
+        <Route path="/" component={PageDashboard} />
+        <Route path="/welcome" component={PageWelcome} />
+        <Route
+          path="/repo/:repoShortId/chat/:chatShortId"
+          component={PageChat}
+        />
+        <Route path="/repo/:repoShortId/chat" component={PageChat} />
+        <Route path="/repo/:repoShortId" component={PageRepo} />
+        <Route path="/chat/:chatId" component={PageChat} />
+        <Route path="/chat" component={PageChat} />
+      </Switch>
+    </AppContainer>
   );
 };
 

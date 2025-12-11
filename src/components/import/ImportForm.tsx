@@ -17,8 +17,6 @@ export const ImportForm = ({ onImport, isImporting }: ImportFormProps) => {
 
   return (
     <Container>
-      <Title>GitHub Repository Importer</Title>
-
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label htmlFor="repo-url">Repository URL</Label>
@@ -74,20 +72,6 @@ export const ImportForm = ({ onImport, isImporting }: ImportFormProps) => {
           {isImporting ? "Importing..." : "Import Repository"}
         </Button>
       </Form>
-
-      <InfoBox>
-        <InfoTitle>What will be imported?</InfoTitle>
-        <InfoList>
-          <li>Repository metadata (name, owner, description)</li>
-          <li>All files in the repository (paths and metadata)</li>
-          <li>Issues and Pull Requests</li>
-          <li>Comments on issues and PRs</li>
-        </InfoList>
-        <InfoText>
-          Data is stored locally in your browser's IndexedDB and persists across
-          sessions.
-        </InfoText>
-      </InfoBox>
     </Container>
   );
 };
@@ -97,12 +81,6 @@ const Container = styled("div")`
   margin: 0 auto;
   padding: 20px;
   background-color: ${(props) => props.theme.palette.bg};
-`;
-
-const Title = styled("h1")`
-  margin-bottom: 20px;
-  font-size: 2rem;
-  color: ${(props) => props.theme.palette.text};
 `;
 
 const Form = styled("form")`
@@ -166,31 +144,4 @@ const TokenHelpText = styled("p")`
 
 const TokenLink = styled("a")`
   color: ${(props) => props.theme.palette.accent};
-`;
-
-const InfoBox = styled("div")`
-  margin-top: 30px;
-  padding: 15px;
-  background-color: ${(props) => props.theme.palette.bg};
-  border: 1px solid ${(props) => props.theme.palette.text};
-  border-radius: 6px;
-`;
-
-const InfoTitle = styled("h3")`
-  margin-top: 0;
-  font-size: 16px;
-  color: ${(props) => props.theme.palette.text};
-`;
-
-const InfoList = styled("ul")`
-  margin: 10px 0;
-  padding-left: 20px;
-  font-size: 14px;
-  color: ${(props) => props.theme.palette.text};
-`;
-
-const InfoText = styled("p")`
-  font-size: 14px;
-  color: ${(props) => props.theme.palette.textMuted};
-  margin: 10px 0 0 0;
 `;

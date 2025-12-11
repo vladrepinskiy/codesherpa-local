@@ -1,16 +1,15 @@
 import { styled } from "goober";
 import { useLLM } from "../../hooks/useLLM";
 import { useChat } from "../../hooks/useChat";
-import { ChatInput } from "../chat/ChatInput";
-import { ChatLoadingSpinner } from "../chat/ChatLoadingSpinner";
-import { ChatMessageList } from "../chat/ChatMessageList";
+import { ChatInput } from "./ChatInput";
+import { ChatLoadingSpinner } from "./ChatLoadingSpinner";
+import { ChatMessageList } from "./ChatMessageList";
 
 export const Chat = () => {
   const { isInitialized } = useLLM();
-  const { messages, input, setInput, isLoading, isDbReady, sendMessage } =
-    useChat();
+  const { messages, input, setInput, isLoading, sendMessage } = useChat();
 
-  if (!isInitialized || !isDbReady) {
+  if (!isInitialized) {
     return <ChatLoadingSpinner />;
   }
 
@@ -21,9 +20,7 @@ export const Chat = () => {
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
-    if (!isInitialized || !isDbReady || !input.trim() || isLoading) {
-      return;
-    }
+    if (!isInitialized || !input.trim() || isLoading) return;
 
     await sendMessage(input);
   };
@@ -44,7 +41,7 @@ export const Chat = () => {
 const ChatContainer = styled("div")`
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 4rem);
+  height: calc(100vh - 3rem);
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;

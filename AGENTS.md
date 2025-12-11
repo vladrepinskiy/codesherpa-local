@@ -121,6 +121,17 @@ const Container = styled("div")`
 - Uses `beforeunload` event listener
 - Only active when `status === "importing"`
 
+### Hash-Based Routing
+
+- Uses `wouter` with `useHashLocation` hook for hash-based routing
+- All routes are prefixed with `#` (e.g., `/#/chat`, `/#/import`)
+- `HashRouteNormalizer` component ensures proper URL normalization:
+  - Converts non-hash paths (like `/chat`) to hash paths (`/#/chat`)
+  - Ensures pathname is always `/` when using hash routing
+  - Keeps hash in sync with current route
+- **Important**: When navigating programmatically, use `setLocation("/route")` - the hash is handled automatically
+- Direct navigation to non-hash URLs (like `/chat`) will be automatically redirected to `/#/chat`
+
 ## Dependencies
 
 - `@electric-sql/pglite`: Database

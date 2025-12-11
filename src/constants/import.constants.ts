@@ -44,6 +44,8 @@ export const TOTAL_IMPORT_STEPS = 5 as const;
 
 export const REPO_ID_PREFIX = "github-" as const;
 
+export const DEMO_REPO_ID_PREFIX = "demo-" as const;
+
 export const FILE_ID_PREFIX = "file-" as const;
 
 export const ISSUE_ID_PREFIX = "issue-" as const;
@@ -64,3 +66,10 @@ export const ERROR_MESSAGE_INVALID_URL = "Invalid GitHub repository URL";
 
 export const ERROR_MESSAGE_REPO_NOT_FOUND =
   "Repository not found. Please check the URL and make sure the repository is public.";
+
+export const REPOSITORY_IMPORT_STATUS = {
+  PENDING: "pending",
+  IMPORTING: "importing",
+  COMPLETE: "complete",
+  ERROR: "error",
+} as const;
