@@ -19,12 +19,10 @@ export const App = () => {
     <ThemeProvider>
       <DatabaseProvider>
         <LLMProvider>
-          <OnboardingProvider>
-            <Router hook={useHashLocation}>
-              <HashRouteNormalizer />
-              <Routes />
-            </Router>
-          </OnboardingProvider>
+          <Router hook={useHashLocation}>
+            <HashRouteNormalizer />
+            <Routes />
+          </Router>
         </LLMProvider>
       </DatabaseProvider>
     </ThemeProvider>
@@ -35,23 +33,25 @@ const Routes = () => {
   const [location] = useLocation();
 
   return (
-    <AppContainer>
-      <Toaster />
-      {location !== "/welcome" && <Topbar />}
-      <DatabaseRepl />
-      <Switch>
-        <Route path="/" component={PageDashboard} />
-        <Route path="/welcome" component={PageWelcome} />
-        <Route
-          path="/repo/:repoShortId/chat/:chatShortId"
-          component={PageChat}
-        />
-        <Route path="/repo/:repoShortId/chat" component={PageChat} />
-        <Route path="/repo/:repoShortId" component={PageRepo} />
-        <Route path="/chat/:chatId" component={PageChat} />
-        <Route path="/chat" component={PageChat} />
-      </Switch>
-    </AppContainer>
+    <OnboardingProvider>
+      <AppContainer>
+        <Toaster />
+        {location !== "/welcome" && <Topbar />}
+        <DatabaseRepl />
+        <Switch>
+          <Route path="/" component={PageDashboard} />
+          <Route path="/welcome" component={PageWelcome} />
+          <Route
+            path="/repo/:repoShortId/chat/:chatShortId"
+            component={PageChat}
+          />
+          <Route path="/repo/:repoShortId/chat" component={PageChat} />
+          <Route path="/repo/:repoShortId" component={PageRepo} />
+          <Route path="/chat/:chatId" component={PageChat} />
+          <Route path="/chat" component={PageChat} />
+        </Switch>
+      </AppContainer>
+    </OnboardingProvider>
   );
 };
 
