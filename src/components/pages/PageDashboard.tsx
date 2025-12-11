@@ -63,7 +63,7 @@ export const PageDashboard = () => {
   return (
     <Page>
       <DashboardContainer>
-        <Title>Repositories</Title>
+        <Title>Explore</Title>
         <RepositoriesGrid>
           {repositories.map((repo) => (
             <RepositoryCard key={repo.id} onClick={() => handleRepoClick(repo)}>

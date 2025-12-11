@@ -6,7 +6,7 @@ import { DatabaseRepl } from "./components/core/DatabaseRepl";
 import { HashRouteNormalizer } from "./components/core/HashRouteNormalizer";
 import { ThemeToggle } from "./components/core/ThemeToggle";
 import { ChatPage } from "./components/pages/ChatPage";
-import { PageDashboard } from "./components/pages/Dashboard";
+import { PageDashboard } from "./components/pages/PageDashboard";
 import { RepoPage } from "./components/pages/RepoPage";
 import { PageWelcome } from "./components/pages/PageWelcome";
 import { DatabaseProvider } from "./context/db.provider";
@@ -25,6 +25,7 @@ export const App = () => {
               <AppContainer>
                 <Toaster />
                 <ThemeToggle />
+                <DatabaseRepl />
                 <Switch>
                   <Route path="/" component={PageDashboard} />
                   <Route path="/welcome" component={PageWelcome} />
@@ -37,7 +38,6 @@ export const App = () => {
                   <Route path="/chat/:chatId" component={ChatPage} />
                   <Route path="/chat" component={ChatPage} />
                 </Switch>
-                <DatabaseRepl />
               </AppContainer>
             </Router>
           </OnboardingProvider>
