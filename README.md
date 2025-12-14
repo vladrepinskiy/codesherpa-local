@@ -8,16 +8,6 @@ A client-side web application that imports GitHub repository data into a local P
 - 💾 **Persistent Storage**: Data stored in IndexedDB, persists across sessions
 - 🔐 **Optional Authentication**: Works without a token, or use your own for higher rate limits
 
-## Stack
-
-- **React**, **TypeScript**, **Vite**
-- **PGLite** - PostgreSQL database in the browser
-- **GitHub REST API** - Data source
-- **WebLLM** - Local LLM inference in the browser
-- **Wouter** - Lightweight routing
-- **Goober** - CSS-in-JS styling
-- **Sonner** - Toast notifications
-
 ## Database Schema
 
 ### Tables
@@ -30,10 +20,6 @@ A client-side web application that imports GitHub repository data into a local P
 - `messages`: Chat messages (id, chat_id, role, content, status, created_at, updated_at)
 
 ## Getting Started
-
-### Prerequisites
-
-- [Bun](https://bun.sh/) (or Node.js with npm/yarn)
 
 ### Installation
 
