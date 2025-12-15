@@ -1,7 +1,7 @@
-import { getDatabase } from "../../../util/db.util";
+import { getDatabase } from "../../../util/db.instance";
 import type { PGlite } from "@electric-sql/pglite";
 
-export abstract class BaseRepository<T> {
+export abstract class BaseRepository {
   protected readonly DB_BATCH_SIZE = 1000;
 
   protected abstract readonly tableName: string;
@@ -10,6 +10,5 @@ export abstract class BaseRepository<T> {
     return getDatabase();
   }
 
-  abstract readById(id: string): Promise<T | null>;
   abstract deleteById(id: string): Promise<void>;
 }

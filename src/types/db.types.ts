@@ -48,9 +48,11 @@ export type Repository = {
   default_branch?: string;
   status: RepositoryImportStatus;
   imported_at: Date;
+  stats: ImportStats;
 };
 
-export type InsertRepository = Omit<Repository, "imported_at">;
+// todo: do we really need this or can we make our logic handle the insertion smarter?
+export type InsertRepository = Omit<Repository, "imported_at" | "stats">;
 
 export type ImportStats = {
   filesCount: number;

@@ -1,59 +1,25 @@
-import { useEffect, useState } from "react";
 import { styled } from "goober";
 import { useLocation, useParams } from "wouter";
+import { useChats } from "../../hooks/useChats";
+import { useRepo } from "../../hooks/useRepo";
+import type { Chat } from "../../types/db.types";
+import { toShortId } from "../../util/id.util";
 import { Page } from "../core/Page";
+import { RepoChats } from "../repo/RepoChats";
 import { RepoInfo } from "../repo/RepoInfo";
 import { RepoStats } from "../repo/RepoStats";
-import { RepoChats } from "../repo/RepoChats";
-import { getRepositories } from "../../util/db.util";
-import { toShortId } from "../../util/id.util";
-import type { Repository, Chat, ImportStats } from "../../types/db.types";
 
 export const PageRepo = () => {
   const params = useParams<{ repoShortId: string }>();
   const [_location, setLocation] = useLocation();
-  const [repository, setRepository] = useState<Repository | null>(null);
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [stats, setStats] = useState<ImportStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { getRepositoryByShortId } = useRepo();
+  const { getChatsByRepoId } = useChats();
 
-  useEffect(() => {
-    const loadRepoData = async () => {
-      try {
-        const { repositoriesRepository, chatsRepository } = getRepositories();
+  const repository = params.repoShortId
+    ? getRepositoryByShortId(params.repoShortId)
+    : undefined;
 
-        if (!params.repoShortId) {
-          setLoading(false);
-          return;
-        }
-
-        const repo = await repositoriesRepository.readByShortId(
-          params.repoShortId
-        );
-
-        if (!repo) {
-          setLoading(false);
-          return;
-        }
-
-        setRepository(repo);
-
-        const [repoChats, repoStats] = await Promise.all([
-          chatsRepository.getChatsByRepoId(repo.id),
-          repositoriesRepository.getImportStats(repo.id),
-        ]);
-
-        setChats(repoChats);
-        setStats(repoStats);
-      } catch (error) {
-        console.error("Failed to load repository data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRepoData();
-  }, [params.repoShortId]);
+  const chats = repository ? getChatsByRepoId(repository.id) : [];
 
   const handleNewChat = () => {
     if (repository) {
@@ -66,14 +32,6 @@ export const PageRepo = () => {
       setLocation(`/repo/${params.repoShortId}/chat/${toShortId(chat.id)}`);
     }
   };
-
-  if (loading) {
-    return (
-      <Page>
-        <LoadingText>Loading repository...</LoadingText>
-      </Page>
-    );
-  }
 
   if (!repository) {
     return (
@@ -90,7 +48,7 @@ export const PageRepo = () => {
 
         <RepoInfo repository={repository} />
 
-        {stats && <RepoStats stats={stats} />}
+        {repository.stats && <RepoStats stats={repository.stats} />}
 
         <RepoChats
           chats={chats}
@@ -114,11 +72,6 @@ const Title = styled("h1")`
   font-weight: 600;
   margin: 0 0 2rem 0;
   color: ${(props) => props.theme.palette.text};
-`;
-
-const LoadingText = styled("div")`
-  font-size: 1.125rem;
-  color: ${(props) => props.theme.palette.textMuted};
 `;
 
 const ErrorText = styled("div")`

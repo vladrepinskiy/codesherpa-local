@@ -1,7 +1,8 @@
 import { DEMO_REPO_ID_PREFIX } from "../constants/import.constants";
 import type { Comment, File, Issue } from "../types/db.types";
 import type { DemoRepoData } from "../types/demo.types";
-import { getDatabase, getRepositories } from "./db.util";
+import { getRepositories } from "./db.util";
+import { getDatabase } from "./db.instance";
 
 async function loadDemoRepoData(): Promise<DemoRepoData> {
   try {

@@ -1,5 +1,7 @@
 import { createContext, useEffect, useState, type ReactNode } from "react";
 import { useLocation, useParams } from "wouter";
+import { useRepo } from "../hooks/useRepo";
+import { useChats } from "../hooks/useChats";
 import { generateChatResponse } from "../services/llm.service";
 import type { Message } from "../types/db.types";
 import { getRepositories } from "../util/db.util";
@@ -12,12 +14,18 @@ type ChatContextType = {
   input: string;
   setInput: (value: string) => void;
   sendMessage: (content: string) => Promise<void>;
-  retryMessage: (messageId: string) => Promise<void>;
 };
 
-export const ChatContext = createContext<ChatContextType | undefined>(
-  undefined
-);
+const defaultChatContext: ChatContextType = {
+  chatId: null,
+  messages: [],
+  isLoading: false,
+  input: "",
+  setInput: () => {},
+  sendMessage: async () => {},
+};
+
+export const ChatContext = createContext<ChatContextType>(defaultChatContext);
 
 type ChatProviderProps = {
   children: ReactNode;
@@ -29,7 +37,9 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     repoShortId?: string;
     chatShortId?: string;
   }>();
-  const [, setLocation] = useLocation();
+  const [_location, setLocation] = useLocation();
+  const { getRepositoryByShortId } = useRepo();
+  const { getChatByShortId, createChat, updateChatTimestamp } = useChats();
 
   const [chatId, setChatId] = useState<string | null>(null);
   const [repoId, setRepoId] = useState<string | null>(null);
@@ -37,18 +47,11 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState("");
 
-  const createNewChat = async (repoId: string): Promise<string> => {
-    const { chatsRepository } = getRepositories();
-    const newChatId = generateId();
-    await chatsRepository.insertChat(newChatId, repoId);
-    return newChatId;
-  };
-
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;
 
     setIsLoading(true);
-    const { chatsRepository, messagesRepository } = getRepositories();
+    const { messagesRepository } = getRepositories();
 
     let currentChatId = chatId;
     let currentRepoId = repoId;
@@ -59,7 +62,8 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         setIsLoading(false);
         return;
       }
-      currentChatId = await createNewChat(currentRepoId);
+      const newChat = await createChat(currentRepoId);
+      currentChatId = newChat.id;
       setChatId(currentChatId);
 
       if (params.repoShortId) {
@@ -136,7 +140,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
 
       await messagesRepository.updateContent(assistantMessageId, fullContent);
       await messagesRepository.updateStatus(assistantMessageId, "complete");
-      await chatsRepository.updateTimestamp(currentChatId);
+      await updateChatTimestamp(currentChatId);
 
       setMessages((prev) =>
         prev.map((msg) =>
@@ -164,88 +168,12 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     }
   };
 
-  const retryMessage = async (messageId: string) => {
-    if (isLoading || !chatId) return;
-
-    const { messagesRepository, chatsRepository } = getRepositories();
-
-    const messageIndex = messages.findIndex((msg) => msg.id === messageId);
-    if (messageIndex === -1) return;
-
-    const targetMessage = messages[messageIndex];
-    if (targetMessage.role !== "assistant") return;
-
-    setIsLoading(true);
-
-    const contextMessages = messages.slice(0, messageIndex);
-
-    await messagesRepository.updateContent(messageId, "");
-    await messagesRepository.updateStatus(messageId, "streaming");
-
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === messageId
-          ? { ...msg, content: "", status: "streaming" }
-          : msg
-      )
-    );
-
-    try {
-      const formattedMessages = contextMessages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
-
-      let fullContent = "";
-
-      await generateChatResponse(formattedMessages, async (chunk) => {
-        fullContent += chunk;
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId ? { ...msg, content: fullContent } : msg
-          )
-        );
-      });
-
-      await messagesRepository.updateContent(messageId, fullContent);
-      await messagesRepository.updateStatus(messageId, "complete");
-      await chatsRepository.updateTimestamp(chatId);
-
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? { ...msg, content: fullContent, status: "complete" }
-            : msg
-        )
-      );
-    } catch (error) {
-      const errorContent =
-        error instanceof Error ? `Error: ${error.message}` : "Error occurred";
-
-      await messagesRepository.updateContent(messageId, errorContent);
-      await messagesRepository.updateStatus(messageId, "interrupted");
-
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? { ...msg, content: errorContent, status: "interrupted" }
-            : msg
-        )
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     const loadRepoAndChat = async () => {
-      const { repositoriesRepository, chatsRepository, messagesRepository } =
-        getRepositories();
+      const { messagesRepository } = getRepositories();
 
       if (params.repoShortId) {
-        const repo = await repositoriesRepository.readByShortId(
-          params.repoShortId
-        );
+        const repo = getRepositoryByShortId(params.repoShortId);
         if (repo) {
           setRepoId(repo.id);
         } else {
@@ -266,7 +194,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         return;
       }
 
-      const chat = await chatsRepository.readByShortId(shortId);
+      const chat = getChatByShortId(shortId);
 
       if (chat) {
         setChatId(chat.id);
@@ -281,7 +209,13 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     };
 
     loadRepoAndChat();
-  }, [params.repoShortId, params.chatShortId, params.chatId]);
+  }, [
+    params.repoShortId,
+    params.chatShortId,
+    params.chatId,
+    getRepositoryByShortId,
+    getChatByShortId,
+  ]);
 
   return (
     <ChatContext.Provider
@@ -292,7 +226,6 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         input,
         setInput,
         sendMessage,
-        retryMessage,
       }}
     >
       {children}

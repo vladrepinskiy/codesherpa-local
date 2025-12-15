@@ -14,24 +14,8 @@ export const createCommentsTable = `
   CREATE INDEX IF NOT EXISTS idx_comments_issue_id ON comments(issue_id);
 `;
 
-export class CommentsRepository extends BaseRepository<Comment> {
+export class CommentsRepository extends BaseRepository {
   protected readonly tableName = "comments";
-
-  async readById(id: string): Promise<Comment | null> {
-    const db = this.getDatabase();
-    const result = await db.query("SELECT * FROM comments WHERE id = $1", [id]);
-
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const row = result.rows[0] as Comment;
-    return {
-      ...row,
-      created_at: new Date(row.created_at),
-      updated_at: row.updated_at ? new Date(row.updated_at) : undefined,
-    };
-  }
 
   async deleteById(id: string): Promise<void> {
     const db = this.getDatabase();

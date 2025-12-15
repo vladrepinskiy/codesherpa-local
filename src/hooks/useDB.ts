@@ -1,12 +1,6 @@
-import { useContext } from "react";
-import { DatabaseContext } from "../context/db.provider";
+import { usePGlite } from "@electric-sql/pglite-react";
 
 export const useDB = () => {
-  const context = useContext(DatabaseContext);
-
-  if (!context) {
-    throw new Error("useDB must be used within a DatabaseProvider");
-  }
-
-  return context;
+  const db = usePGlite();
+  return { db };
 };

@@ -9,21 +9,27 @@ import { PageChat } from "./components/pages/PageChat";
 import { PageDashboard } from "./components/pages/PageDashboard";
 import { PageRepo } from "./components/pages/PageRepo";
 import { PageWelcome } from "./components/pages/PageWelcome";
+import { ChatsProvider } from "./context/chats.provider";
 import { DatabaseProvider } from "./context/db.provider";
 import { LLMProvider } from "./context/llm.provider";
 import { OnboardingProvider } from "./context/onboarding.provider";
+import { RepoProvider } from "./context/repo.provider";
 import { ThemeProvider } from "./context/theme.provider";
 
 export const App = () => {
   return (
     <ThemeProvider>
       <DatabaseProvider>
-        <LLMProvider>
-          <Router hook={useHashLocation}>
-            <HashRouteNormalizer />
-            <Routes />
-          </Router>
-        </LLMProvider>
+        <RepoProvider>
+          <ChatsProvider>
+            <LLMProvider>
+              <Router hook={useHashLocation}>
+                <HashRouteNormalizer />
+                <Routes />
+              </Router>
+            </LLMProvider>
+          </ChatsProvider>
+        </RepoProvider>
       </DatabaseProvider>
     </ThemeProvider>
   );

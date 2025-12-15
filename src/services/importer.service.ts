@@ -20,7 +20,8 @@ import {
 } from "../constants/import.constants";
 import { GitHubAPIError } from "../error/githubapi.error";
 import type { ImportResult, ProgressCallback } from "../types/import.types";
-import { getDatabase, getRepositories } from "../util/db.util";
+import { getRepositories } from "../util/db.util";
+import { getDatabase } from "../util/db.instance";
 import { GitHubAPI } from "./github.service";
 
 export class RepositoryImporter {
