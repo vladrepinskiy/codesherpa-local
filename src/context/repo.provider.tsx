@@ -27,12 +27,7 @@ export const RepoContext = createContext<RepoContextType>(defaultRepoContext);
 export const RepoProvider = ({ children }: { children: ReactNode }) => {
   const result = useLiveQuery<Repository>(REPOSITORIES_QUERY);
 
-  const repositories = result?.rows
-    ? result.rows.map((row) => ({
-        ...row,
-        imported_at: new Date(row.imported_at),
-      }))
-    : [];
+  const repositories = (result?.rows as Repository[]) ?? [];
 
   const getRepositoryById = (id: string) => {
     return repositories.find((repo) => repo.id === id);

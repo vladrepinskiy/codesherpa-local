@@ -5,7 +5,22 @@ import type {
   ImportStats,
 } from "../../../types/db.types";
 
-export const REPOSITORIES_QUERY = `SELECT * FROM repositories ORDER BY imported_at DESC`;
+export const REPOSITORIES_QUERY = `
+  SELECT 
+    r.*,
+    json_build_object(
+      'filesCount', COALESCE(COUNT(DISTINCT f.id), 0),
+      'issuesCount', COALESCE(COUNT(DISTINCT CASE WHEN i.type = 'issue' THEN i.id END), 0),
+      'pullRequestsCount', COALESCE(COUNT(DISTINCT CASE WHEN i.type = 'pull_request' THEN i.id END), 0),
+      'commentsCount', COALESCE(COUNT(DISTINCT c.id), 0)
+    ) as stats
+  FROM repositories r
+  LEFT JOIN files f ON f.repo_id = r.id
+  LEFT JOIN issues i ON i.repo_id = r.id
+  LEFT JOIN comments c ON c.issue_id = i.id
+  GROUP BY r.id
+  ORDER BY r.imported_at DESC
+`;
 
 export const createReposTable = `
   CREATE TABLE IF NOT EXISTS repositories (

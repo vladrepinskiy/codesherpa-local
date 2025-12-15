@@ -1,10 +1,8 @@
 import { styled } from "goober";
-import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { useChats } from "../../hooks/useChats";
 import { useRepo } from "../../hooks/useRepo";
-import type { Chat, ImportStats } from "../../types/db.types";
-import { getRepositories } from "../../util/db.util";
+import type { Chat } from "../../types/db.types";
 import { toShortId } from "../../util/id.util";
 import { Page } from "../core/Page";
 import { RepoChats } from "../repo/RepoChats";
@@ -17,28 +15,11 @@ export const PageRepo = () => {
   const { getRepositoryByShortId } = useRepo();
   const { getChatsByRepoId } = useChats();
 
-  const [stats, setStats] = useState<ImportStats | null>(null);
-
   const repository = params.repoShortId
     ? getRepositoryByShortId(params.repoShortId)
     : undefined;
 
   const chats = repository ? getChatsByRepoId(repository.id) : [];
-
-  // todo: put stats on the repo object and load directly
-  useEffect(() => {
-    const loadStats = async () => {
-      if (!repository) return;
-
-      const { repositoriesRepository } = getRepositories();
-      const repoStats = await repositoriesRepository.getImportStats(
-        repository.id
-      );
-      setStats(repoStats);
-    };
-
-    loadStats();
-  }, [repository?.id]);
 
   const handleNewChat = () => {
     if (repository) {
@@ -67,7 +48,7 @@ export const PageRepo = () => {
 
         <RepoInfo repository={repository} />
 
-        {stats && <RepoStats stats={stats} />}
+        {repository.stats && <RepoStats stats={repository.stats} />}
 
         <RepoChats
           chats={chats}
