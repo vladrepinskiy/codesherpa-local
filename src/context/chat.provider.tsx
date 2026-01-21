@@ -62,6 +62,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         setIsLoading(false);
         return;
       }
+      
       const newChat = await createChat(currentRepoId);
       currentChatId = newChat.id;
       setChatId(currentChatId);
